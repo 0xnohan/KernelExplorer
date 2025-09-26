@@ -20,9 +20,9 @@
         <div class="tx-info">
           <p class="tx-hash">{{ tx.hash }}</p>
           <div class="tx-details">
-            <span class="address">{{ tx.from }}</span>
+            <span class="address clickable" @click="goToAddress(tx.from)">{{ tx.from }}</span>
             <ArrowRight :size="14" class="arrow-icon" />
-            <span class="address">{{ tx.to }}</span>
+            <span class="address clickable" @click="goToAddress(tx.to)">{{ tx.to }}</span>
           </div>
         </div>
         <div class="tx-amount">
@@ -41,11 +41,15 @@ defineProps({
   transactions: Array
 });
 
-const emit = defineEmits(['navigate-to-transactions']);
+const emit = defineEmits(['navigate-to-transactions', 'navigate-to-address']);
 
 const goToTransactionsPage = () => {
   emit('navigate-to-transactions');
 };
+
+const goToAddress = (address) => {
+  emit('navigate-to-address'); 
+}
 </script>
 
 <style scoped>
@@ -175,5 +179,10 @@ const goToTransactionsPage = () => {
   font-size: 0.75rem;
   color: #6b7280;
   display: block;
+}
+
+.clickable:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }
 </style>

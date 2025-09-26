@@ -22,10 +22,10 @@
         <tbody>
           <tr v-for="block in blocks" :key="block.height">
             <td>
-              <div class="cell-content">
+              <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage')" class="cell-content clickable">
                 <Package class="cell-icon text-blue" />
-                <span class="font-semibold">{{ block.height.toLocaleString() }}</span>
-              </div>
+                <span class="font-semibold">#{{ block.height.toLocaleString() }}</span>
+              </a>
             </td>
             <td>
               <div class="cell-content">
@@ -69,6 +69,8 @@ import { LayoutGrid, Package, Clock, ArrowLeftRight, User, Zap } from 'lucide-vu
 defineProps({
   blocks: Array
 });
+
+defineEmits(['navigate']);
 
 const formatTimestamp = (isoString) => {
   const date = new Date(isoString);
@@ -151,5 +153,15 @@ tbody tr:hover {
   border-radius: 9999px;
   font-weight: 500;
   font-size: 0.875rem;
+}
+
+.clickable {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+.clickable:hover .font-semibold {
+  color: #3b82f6;
+  text-decoration: underline;
 }
 </style>

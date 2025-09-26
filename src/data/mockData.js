@@ -50,3 +50,56 @@ export const latestTransactions = [
   { hash: '0x789abc123def45...', from: '0x742d35...', to: '0x8ba1f1...', amount: 0.1, fee: 0.000462, status: 'failed', block_number: 18542890 },
   { hash: '0x456def789abc12...', from: '0x95ad61...', to: '0x742d35...', amount: 5.0, fee: 0.000588, status: 'success', block_number: 18542889 },
 ];
+
+// src/data/mockData.js
+
+export const mockBlockDetails = {
+  block_number: 27,
+  hash: '00000ff2a980e1ee858fa39b20fc9842d4de473acdeaf03f275c7cc0e5f00c',
+  previous_hash: '000000ae55f6d326da82e9d1179cf8be739ae71fb496554428eb2ed47df54eb',
+  confirmations: 1,
+  transaction_count: 2,
+  size: 393, // en octets
+  merkle_root: '5d621b978b7e2343d4e126f3903ac7ea1b4806414491ac43c8e31b48b9742b6a',
+  target_bits: '06d7031e',
+  nonce: '630,570',
+  timestamp: '2025-09-24T04:08:54Z',
+  transactions: [
+    {
+      hash: 'fd88877742952dd9c67fca26af063b99cc04ad84aafb9b541126481dcb0f8cb8c3',
+      inputs: [{ address: 'Coinbase' }],
+      outputs: [
+        { address: 'kaMRsyvKbJ2JVYV52ptMbC5HSY8TBYLSdS', amount: 50.25 }
+      ]
+    },
+    {
+      hash: 'f8fbbef1b4254574fe79aa7669f3642323bcdeb7fa17a36684acfc8f768e1eda9',
+      inputs: [{ address: 'From: 3aff336aca07...' }],
+      outputs: [
+        { address: 'kKQLy7eceC7DJwE1yyZ1EUMTRDMQV12PG', amount: 23 },
+        { address: 'kaMRsyvKbJ2JVYV52ptMbC5HSY8TBYLSdS', amount: 26.75 }
+      ]
+    }
+  ]
+};
+
+export const mockAddressDetails = {
+  address: 'kaMRsyvKbJ2JVYV52ptMbC5HSY8TBYLSdS',
+  balance: 1108,
+  unspent_tx_count: 23,
+  total_tx_count: 29,
+  total_received: 1408,
+  total_sent: '---',
+  utxos: [
+    {
+      hash: 'ad291561e5491054ef3c255a3952f820304b29f30787a611211b2540ee0545a6',
+      inputs: [{ address: 'Coinbase' }],
+      outputs: [{ address: 'kaMRsyvKbJ2JVYV52ptMbC5HSY8TBYLSdS', amount: 50 }]
+    },
+    {
+      hash: '69c392ff39bf20bc97f5953b1f8c523f914a69461e1f40cb3e2da3adc50259',
+      inputs: [{ address: 'Coinbase' }],
+      outputs: [{ address: 'kaMRsyvKbJ2JVYV52ptMbC5HSY8TBYLSdS', amount: 50 }]
+    }
+  ]
+};

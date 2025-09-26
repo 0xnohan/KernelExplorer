@@ -17,6 +17,8 @@ import NavBar from './components/NavBar.vue';
 import HomePage from './views/HomePage.vue';
 import BlocksPage from './views/BlocksPage.vue';
 import TransactionsPage from './views/TransactionsPage.vue';
+import BlockDetailsPage from './views/BlockDetailsPage.vue';
+import AddressDetailsPage from './views/AddressDetailsPage.vue';
 
 const isSidebarOpen = ref(true);
 const toggleSidebar = () => {
@@ -27,6 +29,8 @@ const pages = {
   HomePage, 
   BlocksPage,
   TransactionsPage,
+  BlockDetailsPage,
+  AddressDetailsPage,
   // MempoolPage 
 };
 

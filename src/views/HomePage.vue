@@ -26,7 +26,11 @@
 
       <div class="lists-grid">
         <LatestBlocks :blocks="blocks" @navigate-to-blocks="$emit('navigate', 'BlocksPage')" />
-        <LatestTransactions :transactions="transactions" @navigate-to-transactions="$emit('navigate', 'TransactionsPage')" />
+        <LatestTransactions 
+          :transactions="transactions" 
+          @navigate-to-transactions="$emit('navigate', 'TransactionsPage')"
+          @navigate-to-address="$emit('navigate', 'AddressDetailsPage')" 
+        />
       </div>
     </div>
   </div>

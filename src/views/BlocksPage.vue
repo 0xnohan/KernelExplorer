@@ -1,12 +1,15 @@
 <template>
   <div class="container">
-    <BlocksList :blocks="blocks" />
+    <BlocksList :blocks="blocks" @navigate="$emit('navigate', $event)" />
   </div>
 </template>
 
 <script setup>
 import BlocksList from '../components/BlocksList.vue';
 import { latestBlocks } from '../data/mockData.js';
+
+
+defineEmits(['navigate']);
 
 const blocks = latestBlocks;
 </script>
