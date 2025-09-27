@@ -66,7 +66,6 @@ const toggle = () => {
 </script>
 
 <style scoped>
-/* --- NOUVEAU STYLE GLASSMORPHISME POUR LA NAVBAR --- */
 .sidebar {
   background: rgba(30, 27, 75, 0.5);
   -webkit-backdrop-filter: blur(20px);

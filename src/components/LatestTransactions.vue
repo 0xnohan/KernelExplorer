@@ -33,7 +33,6 @@
 import { Activity, CheckCircle2, ExternalLink } from 'lucide-vue-next';
 
 defineProps({
-  // Limiter aux 5 dernières transactions pour la page d'accueil
   transactions: {
     type: Array,
     default: () => []
@@ -44,7 +43,6 @@ defineEmits(['navigate']);
 </script>
 
 <style scoped>
-/* Styles inspirés de LatestBlocks.vue pour la cohérence */
 .card-header {
   display: flex;
   align-items: center;
@@ -87,7 +85,7 @@ defineEmits(['navigate']);
 }
 
 .icon-wrapper {
-  background-color: rgba(52, 211, 153, 0.1); /* Vert pour le succès */
+  background-color: rgba(52, 211, 153, 0.1); 
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -102,7 +100,7 @@ defineEmits(['navigate']);
 
 .tx-info {
   flex-grow: 1;
-  min-width: 0; /* Empêche le texte de déborder */
+  min-width: 0; 
 }
 .tx-hash {
   font-weight: 600;

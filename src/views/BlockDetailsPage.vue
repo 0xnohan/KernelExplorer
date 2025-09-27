@@ -35,7 +35,7 @@
             <span class="value font-mono">{{ block.miner }}</span>
           </div>
           <div class="detail-row">
-            <span class="label"><Zap class="icon" />Gas Used / Limit</span>
+            <span class="label"><Zap class="icon" />Block Size / Block Limit</span>
             <span class="value">{{ block.size }} bytes / 1 000 000 bytes ({{ ((block.size / 1000000) * 100).toFixed(2) }}%)</span>
           </div>
           <div class="detail-row">
@@ -81,7 +81,6 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
-// Ajout de l'icône CheckCircle2
 import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -105,7 +104,7 @@ onMounted(async () => {
       apiState.isConnected = false;
     }
   } catch (error) {
-    console.error(`Impossible de récupérer les détails du bloc ${props.blockHash}:`, error);
+    console.error(`Impossible to fetch block details for ${props.blockHash}:`, error);
     apiState.isConnected = false;
   } finally {
     loading.value = false;
@@ -223,7 +222,6 @@ onMounted(async () => {
 }
 .list-header, .list-row {
   display: grid;
-  /* Mise à jour des colonnes pour 4 éléments */
   grid-template-columns: 1.5fr 1.2fr 1.2fr 1fr;
   gap: 1rem;
   align-items: center;

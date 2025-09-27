@@ -50,12 +50,12 @@ defineProps({
 }
 .title {
   font-size: 0.875rem;
-  color: #e0e7ff; /* Texte plus clair */
+  color: #e0e7ff;
 }
 .value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #ffffff; /* Texte blanc */
+  color: #ffffff; 
 }
 .change {
   display: flex;
@@ -77,5 +77,5 @@ defineProps({
 .text-green { color: #6ee7b7; }
 .bg-orange-light { background-color: rgba(245, 158, 11, 0.2); }
 .text-orange { color: #fcd34d; }
-.text-red { color: #f87171; } /* Ajout pour le cas 'decrease' */
+.text-red { color: #f87171; } 
 </style>

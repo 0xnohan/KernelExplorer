@@ -24,7 +24,6 @@
   .lists-grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* --- STYLE GLASSMORPHISME SIMPLIFIÉ --- */
 .card {
   background: rgba(255, 255, 255, 0.05);
   background-image: linear-gradient(
@@ -35,10 +34,7 @@
   -webkit-backdrop-filter: blur(15px);
   backdrop-filter: blur(15px);
   border-radius: 1.5rem;
-
-  /* Bordure simple, efficace et arrondie */
   border: 1px solid rgba(255, 255, 255, 0.2);
-
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   color: var(--color-text-primary);
 }
@@ -50,7 +46,6 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-/* Utilitaires */
 .font-mono { font-family: monospace; }
 .text-blue { color: var(--color-blue); }
 .text-purple { color: var(--color-purple); }

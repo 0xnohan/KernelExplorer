@@ -59,7 +59,6 @@ defineProps({
   blocks: Array
 });
 
-// L'événement de navigation est déjà configuré pour passer des props
 defineEmits(['navigate']);
 
 const formatTimestamp = (isoString) => {
@@ -144,7 +143,7 @@ const formatTimestamp = (isoString) => {
   text-overflow: ellipsis;
   max-width: 150px;
 }
-/* Style pour le lien du mineur */
+
 .miner-link {
   color: var(--color-text-secondary);
   text-decoration: none;

@@ -8,14 +8,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import BlocksList from '../components/BlocksList.vue';
-import { apiState } from '../store.js'; // Import apiState pour l'URL
+import { apiState } from '../store.js'; 
 
 const loading = ref(true);
 const blocks = ref([]);
 
 const emit = defineEmits(['navigate']);
-
-// NOUVELLE FONCTION POUR RELAYER CORRECTEMENT L'ÉVÉNEMENT
 const forwardNavigation = (pageName, props) => {
   emit('navigate', pageName, props);
 };

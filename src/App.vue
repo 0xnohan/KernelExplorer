@@ -33,6 +33,8 @@ import BlocksPage from './views/BlocksPage.vue';
 import TransactionsPage from './views/TransactionsPage.vue';
 import BlockDetailsPage from './views/BlockDetailsPage.vue';
 import AddressDetailsPage from './views/AddressDetailsPage.vue';
+import TransactionDetailsPage from './views/TransactionDetailsPage.vue';
+import MempoolPage from './views/MempoolPage.vue';
 
 const isModalOpen = ref(false);
 
@@ -51,7 +53,9 @@ const pages = {
   BlocksPage,
   TransactionsPage,
   BlockDetailsPage,
-  AddressDetailsPage
+  AddressDetailsPage,
+  TransactionDetailsPage,
+  MempoolPage
 };
 const currentPage = ref({ name: 'HomePage', props: {} });
 const activeComponent = computed(() => pages[currentPage.value.name]);
@@ -80,6 +84,5 @@ const handleNavigation = (pageName, props = {}) => {
 .main-content {
   overflow-y: auto;
   height: 100vh;
-  /* La couleur de fond est retirée pour laisser le body visible */
 }
 </style>

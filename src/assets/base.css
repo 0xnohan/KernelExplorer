@@ -13,8 +13,7 @@
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* --- NOUVEAU DÉGRADÉ PLUS SOMBRE --- */
   background: linear-gradient(100deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
   color: var(--color-text-primary);
-  min-height: 100vh; /* S'assurer que le dégradé couvre tout l'écran */
+  min-height: 100vh; 
 }

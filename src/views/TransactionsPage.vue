@@ -35,7 +35,6 @@ onMounted(async () => {
   }
 });
 
-// Fonction pour propager l'événement de navigation au parent (App.vue)
 const handleNavigation = (page, params) => {
   emit('navigate', page, params);
 };

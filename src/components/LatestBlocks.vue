@@ -30,14 +30,12 @@
 </template>
 
 <script setup>
-// Ajout de 'ExternalLink'
 import { LayoutGrid, Package, ExternalLink } from 'lucide-vue-next';
 
 defineProps({
   blocks: Array
 });
 
-// Événement de navigation déclaré
 defineEmits(['navigate']);
 
 const formatTimestampAgo = (isoString) => {
@@ -64,7 +62,6 @@ const formatTimestampAgo = (isoString) => {
   padding: 1rem 1.5rem;
 }
 
-/* STYLE DU BOUTON AJOUTÉ */
 .view-all-button {
   margin-left: auto;
   display: flex;
@@ -76,6 +73,7 @@ const formatTimestampAgo = (isoString) => {
   font-weight: 500;
   transition: opacity 0.2s;
 }
+
 .view-all-button:hover {
   opacity: 0.8;
 }
@@ -94,7 +92,7 @@ const formatTimestampAgo = (isoString) => {
   border-radius: 0.75rem;
   background-color: rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s;
-  cursor: pointer; /* Curseur pour indiquer que c'est cliquable */
+  cursor: pointer; 
 }
 .block-item:hover {
   background-color: rgba(255, 255, 255, 0.1);

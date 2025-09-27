@@ -71,23 +71,17 @@ onMounted(async () => {
   loading.value = true;
   apiState.isConnecting = true;
   try {
-    // --- CORRECTION CI-DESSOUS ---
     const [blocksRes, txsRes] = await Promise.all([
       fetch(`${apiState.baseUrl}/api/blocks`),
-      fetch(`${apiState.baseUrl}/api/transactions`) // 1. APPEL API AJOUTÉ
+      fetch(`${apiState.baseUrl}/api/transactions`) 
     ]);
 
-    // On traite la réponse des blocs
     if (blocksRes.ok) {
       allBlocks.value = await blocksRes.json();
     }
-
-    // 2. LOGIQUE AJOUTÉE pour traiter la réponse des transactions
     if (txsRes.ok) {
         allTransactions.value = await txsRes.json();
     }
-
-    // L'état de la connexion dépend du succès des deux appels
     if (blocksRes.ok && txsRes.ok) {
         apiState.isConnected = true;
     } else {
@@ -95,7 +89,7 @@ onMounted(async () => {
     }
 
   } catch (error) {
-    console.error("Erreur de connexion:", error);
+    console.error("Connexion error:", error);
     apiState.isConnected = false;
   } finally {
     loading.value = false;
@@ -105,7 +99,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* --- Styles inchangés --- */
 .hero-section {
   padding: 4rem 0;
   background: transparent;

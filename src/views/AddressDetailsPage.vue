@@ -51,17 +51,18 @@
               <div v-for="tx in addressDetails.transactions" :key="tx.hash" class="list-row">
                 <div class="txn-hash-cell">
                   <CheckCircle2 size="18" class="status-icon-success" />
-                  <span class="font-mono hash-link">{{ tx.hash.substring(0, 12) }}...</span>
+                  <span class="font-mono hash-link" @click="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })">{{ tx.hash.substring(0, 15) }}...</span>
                 </div>
                 
-                <span>{{ tx.block_height }}</span>
+                <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="hash-link">{{ tx.block_height }}</a>
 
-                <span class="font-mono hash-link">{{ tx.from[0].substring(0, 12) }}...</span>
+                <span v-if="tx.from[0] === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
+                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ tx.from[0].substring(0, 15) }}...</a>
 
-                <span class="font-mono hash-link address-to">
+                <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: findMainRecipient(tx.to, tx.from, true) })" class="font-mono hash-link address-to">
                   <ArrowRight size="14" />
                   {{ findMainRecipient(tx.to, tx.from) }}...
-                </span>
+                </a>
                 
                 <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
                   {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KNL
@@ -70,18 +71,17 @@
             </div>
           </div>
           <div v-else class="no-data-message">
-            No transactions found for this address.
+            No transactions found for this address
           </div>
       </div>
     </div>
-     <div v-else class="loading-message">Address not found.</div>
+     <div v-else class="loading-message">Address not found</div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
-// Ajout de l'icône CheckCircle2
 import { ArrowLeft, MapPin, Wallet, ArrowLeftRight, DownloadCloud, UploadCloud, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
 
 const props = defineProps({
@@ -93,31 +93,26 @@ defineEmits(['navigate']);
 const loading = ref(true);
 const addressDetails = ref(null);
 
-const findMainRecipient = (outputs, inputs) => {
-  const recipient = outputs.find(out => !inputs.includes(out.address));
-  return recipient ? recipient.address.substring(0, 12) : outputs[0].address.substring(0, 12);
+const findMainRecipient = (outputs, inputs, fullAddress = false) => {
+  const recipientOutput = outputs.find(out => !inputs.includes(out.address));
+  const address = recipientOutput ? recipientOutput.address : (outputs[0] ? outputs[0].address : '');
+  return fullAddress ? address : address.substring(0, 12);
 };
 
 onMounted(async () => {
   if (!props.addressHash) return;
-  apiState.isConnecting = true;
+  loading.value = true; 
   try {
     const response = await fetch(`${apiState.baseUrl}/api/address/${props.addressHash}`); 
     if (response.ok) {
       addressDetails.value = await response.json();
-      apiState.isConnected = true;
-    } else {
-      apiState.isConnected = false;
     }
   } catch (error) {
-    console.error(`Impossible de récupérer les détails de l'adresse ${props.addressHash}:`, error);
-    apiState.isConnected = false;
+    console.error(`Impossible to fetch address details for ${props.addressHash}:`, error);
   } finally {
     loading.value = false;
-    apiState.isConnecting = false;
   }
 });
-
 </script>
 
 <style scoped>
@@ -204,19 +199,23 @@ onMounted(async () => {
 .font-mono {
   font-family: monospace;
 }
-.hash-link {
+a.hash-link {
   color: var(--color-blue);
   cursor: pointer;
+  text-decoration: none;
+}
+a.hash-link:hover {
+    text-decoration: underline;
 }
 .balance-amount {
-  font-size: 1.5rem;
+  font-weight: 700;
   color: #6ee7b7;
 }
 .tx-badge {
     background-color: rgba(129, 140, 248, 0.2);
     color: #a5b4fc;
     padding: 0.35rem 0.75rem;
-    border-radius: 9999px;
+    border-radius: 6px;
 }
 
 .no-data-message {
@@ -229,7 +228,6 @@ onMounted(async () => {
 }
 .list-header, .list-row {
   display: grid;
-  /* Mise à jour des colonnes pour 5 éléments */
   grid-template-columns: 1.5fr 1fr 1.2fr 1.2fr 1fr;
   gap: 1rem;
   align-items: center;
@@ -279,5 +277,10 @@ onMounted(async () => {
 }
 .status-icon-success {
   color: #6ee7b7;
+}
+
+.coinbase-text {
+    color: #fcd34d; 
+    font-weight: 600;
 }
 </style>

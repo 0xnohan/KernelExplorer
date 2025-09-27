@@ -27,7 +27,6 @@ import { ref } from 'vue';
 
 const emit = defineEmits(['close', 'save']);
 
-// Les valeurs par défaut sont extraites de l'URL sauvegardée si elle existe
 const savedUrl = localStorage.getItem('kernelApiUrl') || 'http://127.0.0.1:5000';
 const urlParts = savedUrl.replace('http://', '').split(':');
 const ip = ref(urlParts[0] || '127.0.0.1');
@@ -41,15 +40,14 @@ const handleSave = () => {
 </script>
 
 <style scoped>
-/* --- NOUVEAU STYLE GLASSMORPHISME POUR LA MODALE --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(10, 5, 40, 0.5); /* Fond overlay plus sombre */
-  -webkit-backdrop-filter: blur(10px); /* Effet de flou sur l'arrière-plan */
+  background-color: rgba(10, 5, 40, 0.5); 
+  -webkit-backdrop-filter: blur(10px); 
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
@@ -60,16 +58,13 @@ const handleSave = () => {
 .modal-content {
   width: 90%;
   max-width: 400px;
-  /* La classe .card du main.css applique déjà le style glass */
 }
-
-/* Le card-header est déjà stylé globalement */
 
 .form-container {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Espace augmenté */
+  gap: 1.5rem; 
 }
 
 .form-group {
