@@ -73,17 +73,15 @@ onMounted(async () => {
   apiState.isConnecting = true;
   try {
     const [blocksRes, txsRes] = await Promise.all([
-      fetch(`${apiState.baseUrl}/api/blocks`), // Utilise l'URL du store
-      // ... (autres appels fetch)
+      fetch(`${apiState.baseUrl}/api/blocks`), 
     ]);
     
     if (blocksRes.ok) {
       allBlocks.value = await blocksRes.json();
-      apiState.isConnected = true; // Met à jour le statut si au moins un appel réussit
+      apiState.isConnected = true; 
     } else {
       apiState.isConnected = false;
     }
-    // ... (gestion des autres réponses)
   } catch (error) {
     console.error("Erreur de connexion:", error);
     apiState.isConnected = false;
@@ -95,7 +93,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Styles existants */
 .hero-section {
   padding: 4rem 0 6rem 0;
   background: linear-gradient(100deg, #4f46e5, #8b5cf6);

@@ -27,35 +27,24 @@ import NavBar from './components/NavBar.vue';
 import ConnectionModal from './components/ConnectionModal.vue';
 import { apiState } from './store.js';
 
-// Import des pages
 import HomePage from './views/HomePage.vue';
 import BlocksPage from './views/BlocksPage.vue';
 import TransactionsPage from './views/TransactionsPage.vue';
 import BlockDetailsPage from './views/BlockDetailsPage.vue';
 import AddressDetailsPage from './views/AddressDetailsPage.vue';
 
-// --- Gestion de la modale de connexion ---
 const isModalOpen = ref(false);
 
 const saveConnection = (newUrl) => {
-  // 1. Sauvegarde la nouvelle URL dans le localStorage du navigateur
   localStorage.setItem('kernelApiUrl', newUrl);
-  
-  // 2. Met à jour l'état actuel (facultatif mais propre)
   apiState.baseUrl = newUrl;
-  
-  // 3. Ferme la modale
   isModalOpen.value = false;
-  
-  // 4. Recharge la page pour utiliser la nouvelle configuration partout
   window.location.reload(); 
 };
 
-// --- Gestion de la barre latérale ---
 const isSidebarOpen = ref(true);
 const toggleSidebar = () => { isSidebarOpen.value = !isSidebarOpen.value; };
 
-// --- Logique de navigation ---
 const pages = { 
   HomePage, 
   BlocksPage,
@@ -76,12 +65,11 @@ const handleNavigation = (pageName, props = {}) => {
 </script>
 
 <style>
-/* Style global pour la mise en page du dashboard */
 .dashboard-layout {
   display: grid;
   grid-template-columns: 240px 1fr;
   transition: grid-template-columns 0.3s ease-in-out;
-  height: 100vh; /* S'assurer que le layout prend toute la hauteur */
+  height: 100vh; 
 }
 
 .dashboard-layout.sidebar-closed {
@@ -92,7 +80,7 @@ const handleNavigation = (pageName, props = {}) => {
   overflow-y: auto;
   height: 100vh;
   background-color: #f9fafb;
-  display: flex; /* Ajout important */
-  flex-direction: column; /* Ajout important */
+  display: flex; 
+  flex-direction: column; 
 }
 </style>

@@ -68,7 +68,7 @@
 </template>
 <script setup>
 import { ref, onMounted } from 'vue';
-import { apiState } from '../store.js'; // Importer l'état
+import { apiState } from '../store.js'; 
 
 const props = defineProps({
   blockHash: { type: String, required: true }
@@ -81,7 +81,7 @@ onMounted(async () => {
   if (!props.blockHash) return;
   apiState.isConnecting = true;
   try {
-    const response = await fetch(`${apiState.baseUrl}/api/block/${props.blockHash}`); // Utilise l'URL du store
+    const response = await fetch(`${apiState.baseUrl}/api/block/${props.blockHash}`); 
     if (response.ok) {
       block.value = await response.json();
       apiState.isConnected = true;

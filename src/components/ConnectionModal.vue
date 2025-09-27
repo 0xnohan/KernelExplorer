@@ -46,11 +46,8 @@ const handleSave = () => {
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
-  
-  /* Modification ici */
-  align-items: flex-start; /* Aligne la modale en haut */
-  padding-top: 15vh;      /* Ajoute un espace de 15% depuis le haut */
-
+  align-items: flex-start;
+  padding-top: 15vh;   
   z-index: 1000;
 }
 .modal-content {

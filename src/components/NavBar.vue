@@ -175,7 +175,6 @@ const toggle = () => {
   transform: rotate(180deg); 
 }
 
-/* Styles pour la carte de connexion */
 .connection-card-wrapper {
   margin-top: auto;
 }
@@ -226,20 +225,19 @@ const toggle = () => {
   display: flex;
 }
 
-/* --- NOUVEAUX STYLES POUR LE MODE FERMÉ --- */
 .connection-card.is-closed {
   justify-content: center;
-  background-color: transparent; /* Rend le fond de la carte transparent */
-  padding: 0; /* Supprime le padding */
+  background-color: transparent; 
+  padding: 0; 
 }
 .connection-card.is-closed .status-indicator,
 .connection-card.is-closed .status-text {
-  display: none; /* Cache l'indicateur et le texte */
+  display: none; 
 }
 .connection-card.is-closed .connect-button {
-  border: none; /* Supprime la bordure du bouton */
-  background-color: #1f2937; /* Donne un fond au bouton seul */
-  padding: 0.75rem; /* Augmente légèrement la taille du bouton */
+  border: none; 
+  background-color: #1f2937; 
+  padding: 0.75rem; 
 }
 .connection-card.is-closed .connect-button:hover {
   background-color: #374151;

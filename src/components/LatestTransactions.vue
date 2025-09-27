@@ -130,7 +130,7 @@ const goToAddress = (address) => {
 
 .tx-info {
   flex-grow: 1;
-  min-width: 0; /* Empêche le débordement de texte */
+  min-width: 0; 
 }
 
 .tx-hash {
