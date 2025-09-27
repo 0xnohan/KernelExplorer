@@ -3,7 +3,7 @@
     <div class="card-header">
       <div class="title-container">
         <LayoutGrid class="title-icon" />
-        <h3>Latest Blocks</h3>
+        <h3>Blocks</h3>
       </div>
     </div>
 
@@ -19,7 +19,7 @@
 
       <div class="list-body">
         <div v-for="block in blocks" :key="block.height" class="list-row">
-          <a href="#" @click.prevent="$emit('navigate', { blockHash: block.hash })" class="cell-content block-height">
+          <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: block.hash })" class="cell-content block-height">
             <Package class="cell-icon" />
             <span>{{ block.height }}</span>
           </a>
@@ -33,7 +33,9 @@
           </div>
           <div class="cell-content">
             <User class="cell-icon" />
-            <span class="font-mono">{{ block.miner }}</span>
+            <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: block.miner })" class="font-mono miner-link">
+              {{ block.miner }}
+            </a>
           </div>
           <div class="cell-content">
             <Zap class="cell-icon text-yellow" />
@@ -57,9 +59,9 @@ defineProps({
   blocks: Array
 });
 
+// L'événement de navigation est déjà configuré pour passer des props
 defineEmits(['navigate']);
 
-// Nouvelle fonction pour formater le timestamp comme sur la maquette
 const formatTimestamp = (isoString) => {
   const date = new Date(isoString);
   const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
@@ -69,14 +71,11 @@ const formatTimestamp = (isoString) => {
 
 <style scoped>
 .card {
-  /* Le style de base glassmorphisme est déjà appliqué globalement */
-  overflow: hidden; /* Empêche les éléments de déborder */
+  overflow: hidden;
 }
-
 .card-header {
   padding: 1.25rem 1.5rem;
 }
-
 .title-container {
   display: flex;
   align-items: center;
@@ -84,19 +83,15 @@ const formatTimestamp = (isoString) => {
   font-size: 1.25rem;
   font-weight: 600;
 }
-
 .list-container {
   padding: 0 1.5rem 1.5rem;
 }
-
-/* Grille pour l'en-tête et les lignes */
 .list-header, .list-row {
   display: grid;
   grid-template-columns: 1.2fr 1.5fr 1fr 2fr 1fr 1fr;
   gap: 1rem;
   align-items: center;
 }
-
 .list-header {
   padding: 1rem 0;
   font-size: 0.75rem;
@@ -105,36 +100,30 @@ const formatTimestamp = (isoString) => {
   font-weight: 500;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .list-body {
   display: flex;
   flex-direction: column;
 }
-
 .list-row {
   padding: 1rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.875rem;
 }
-
 .list-row:last-child {
   border-bottom: none;
 }
-
 .cell-content {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--color-text-secondary);
 }
-
 .cell-icon {
   width: 16px;
   height: 16px;
-  color: #a5b4fc; /* Couleur par défaut pour les icônes */
+  color: #a5b4fc;
   flex-shrink: 0;
 }
-
 .block-height {
   font-weight: 600;
   color: var(--color-text-primary);
@@ -147,20 +136,27 @@ const formatTimestamp = (isoString) => {
 .block-height .cell-icon {
   color: var(--color-blue);
 }
-
 .font-mono {
   font-family: monospace;
   font-size: 0.8rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px; /* Empêche les adresses trop longues de casser le layout */
+  max-width: 150px;
 }
-
+/* Style pour le lien du mineur */
+.miner-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.miner-link:hover {
+  color: var(--color-blue);
+  text-decoration: underline;
+}
 .text-yellow {
   color: #fcd34d;
 }
-
 .reward-badge {
   background-color: rgba(52, 211, 153, 0.2);
   color: #6ee7b7;
@@ -169,7 +165,6 @@ const formatTimestamp = (isoString) => {
   font-weight: 500;
   font-size: 0.875rem;
 }
-
 .text-right {
   text-align: right;
 }

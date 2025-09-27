@@ -59,15 +59,16 @@
             <span>From</span>
             <span>To</span>
             <span class="text-right">Value</span>
-            <span>Status</span>
           </div>
           <div class="list-body">
             <div v-for="tx in block.transactions" :key="tx.hash" class="list-row">
-              <span class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</span>
+              <div class="txn-hash-cell">
+                <CheckCircle2 size="18" class="status-icon-success" />
+                <span class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</span>
+              </div>
               <span class="font-mono">{{ tx.inputs[0].address.includes('Coinbase') ? 'Coinbase' : tx.inputs[0].address.substring(0, 15) + '...' }}</span>
               <span class="font-mono">{{ tx.outputs[0].address.substring(0, 15) }}...</span>
               <span class="text-right">{{ tx.outputs[0].amount }} KNL</span>
-              <span class="status-badge success">Success</span>
             </div>
           </div>
         </div>
@@ -80,7 +81,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
-import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash } from 'lucide-vue-next';
+// Ajout de l'icône CheckCircle2
+import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2 } from 'lucide-vue-next';
 
 const props = defineProps({
   blockHash: { type: String, required: true }
@@ -221,7 +223,8 @@ onMounted(async () => {
 }
 .list-header, .list-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  /* Mise à jour des colonnes pour 4 éléments */
+  grid-template-columns: 1.5fr 1.2fr 1.2fr 1fr;
   gap: 1rem;
   align-items: center;
 }
@@ -245,18 +248,15 @@ onMounted(async () => {
 .list-row:last-child {
   border-bottom: none;
 }
-
-.status-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 500;
-}
-.status-badge.success {
-  background-color: rgba(52, 211, 153, 0.2);
-  color: #6ee7b7;
-}
-
 .text-right {
-  text-align: center;
+  text-align: right;
+}
+.txn-hash-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.status-icon-success {
+  color: #6ee7b7;
 }
 </style>

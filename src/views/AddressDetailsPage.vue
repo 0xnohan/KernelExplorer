@@ -39,21 +39,38 @@
 
       <div class="card tx-card">
         <h2 class="card-title">Transaction History ({{ addressDetails.transactions.length }})</h2>
-        <div class="list-container">
+        <div v-if="addressDetails.transactions.length > 0" class="list-container">
            <div class="list-header">
               <span>Txn Hash</span>
               <span>Block</span>
-              <span class="text-right">Timestamp</span>
-              <span>Status</span>
+              <span>From</span>
+              <span>To</span>
+              <span class="text-right">Value</span>
             </div>
             <div class="list-body">
               <div v-for="tx in addressDetails.transactions" :key="tx.hash" class="list-row">
-                <span class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</span>
-                <span>#{{ tx.block_height }}</span>
-                <span class="text-right">{{ new Date(tx.timestamp).toLocaleString() }}</span>
-                <span class="status-badge success">Success</span>
+                <div class="txn-hash-cell">
+                  <CheckCircle2 size="18" class="status-icon-success" />
+                  <span class="font-mono hash-link">{{ tx.hash.substring(0, 12) }}...</span>
+                </div>
+                
+                <span>{{ tx.block_height }}</span>
+
+                <span class="font-mono hash-link">{{ tx.from[0].substring(0, 12) }}...</span>
+
+                <span class="font-mono hash-link address-to">
+                  <ArrowRight size="14" />
+                  {{ findMainRecipient(tx.to, tx.from) }}...
+                </span>
+                
+                <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
+                  {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KNL
+                </span>
               </div>
             </div>
+          </div>
+          <div v-else class="no-data-message">
+            No transactions found for this address.
           </div>
       </div>
     </div>
@@ -64,7 +81,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
-import { ArrowLeft, MapPin, Wallet, ArrowLeftRight, DownloadCloud, UploadCloud } from 'lucide-vue-next';
+// Ajout de l'icône CheckCircle2
+import { ArrowLeft, MapPin, Wallet, ArrowLeftRight, DownloadCloud, UploadCloud, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
 
 const props = defineProps({
   addressHash: { type: String, required: true }
@@ -74,6 +92,11 @@ defineEmits(['navigate']);
 
 const loading = ref(true);
 const addressDetails = ref(null);
+
+const findMainRecipient = (outputs, inputs) => {
+  const recipient = outputs.find(out => !inputs.includes(out.address));
+  return recipient ? recipient.address.substring(0, 12) : outputs[0].address.substring(0, 12);
+};
 
 onMounted(async () => {
   if (!props.addressHash) return;
@@ -186,23 +209,28 @@ onMounted(async () => {
   cursor: pointer;
 }
 .balance-amount {
-  font-weight: 700;
+  font-size: 1.5rem;
   color: #6ee7b7;
 }
 .tx-badge {
     background-color: rgba(129, 140, 248, 0.2);
     color: #a5b4fc;
     padding: 0.35rem 0.75rem;
-    border-radius: 6px;
+    border-radius: 9999px;
 }
 
-/* Styles pour la liste de transactions */
+.no-data-message {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
 .list-container {
   padding: 0 1.5rem 1.5rem;
 }
 .list-header, .list-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 2fr 1fr;
+  /* Mise à jour des colonnes pour 5 éléments */
+  grid-template-columns: 1.5fr 1fr 1.2fr 1.2fr 1fr;
   gap: 1rem;
   align-items: center;
 }
@@ -227,19 +255,29 @@ onMounted(async () => {
   border-bottom: none;
 }
 
-.status-badge {
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 500;
-  font-size: 0.8rem;
-  display: inline-block;
-  text-align: center;
-}
-.status-badge.success {
-  background-color: rgba(52, 211, 153, 0.2);
-  color: #6ee7b7;
-}
 .text-right {
   text-align: right;
+}
+.address-to {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.value-col {
+  font-weight: 600;
+}
+.text-green {
+  color: #6ee7b7;
+}
+.text-red {
+  color: #fca5a5;
+}
+.txn-hash-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.status-icon-success {
+  color: #6ee7b7;
 }
 </style>

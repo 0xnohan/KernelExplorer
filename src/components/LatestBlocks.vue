@@ -3,10 +3,14 @@
     <div class="card-header">
       <LayoutGrid />
       <h3>Recent Blocks</h3>
+      <a href="#" @click.prevent="$emit('navigate', 'BlocksPage')" class="view-all-button">
+        View All
+        <ExternalLink :size="14" />
+      </a>
     </div>
 
     <div class="blocks-list">
-      <div v-for="block in blocks" :key="block.height" class="block-item">
+      <div v-for="block in blocks" :key="block.height" class="block-item" @click="$emit('navigate', 'BlockDetailsPage', { blockHash: block.hash })">
         <div class="icon-wrapper">
           <Package :size="20" />
         </div>
@@ -14,7 +18,7 @@
           <p class="block-number">{{ block.height.toLocaleString() }}</p>
           <div class="block-details">
             <span>Transactions: {{ block.transaction_count }}</span>
-            <span>Hash: {{ block.hash.substring(0, 35)}}...</span>
+            <span class="block-hash-text">Hash: {{ block.hash.substring(0, 35)}}...</span>
           </div>
         </div>
         <div class="block-timestamp">
@@ -26,18 +30,22 @@
 </template>
 
 <script setup>
-import { LayoutGrid, Package } from 'lucide-vue-next';
+// Ajout de 'ExternalLink'
+import { LayoutGrid, Package, ExternalLink } from 'lucide-vue-next';
 
 defineProps({
   blocks: Array
 });
 
-// 3. Nouvelle fonction pour le format "ago"
+// Événement de navigation déclaré
+defineEmits(['navigate']);
+
 const formatTimestampAgo = (isoString) => {
   const now = new Date();
   const past = new Date(isoString);
   const seconds = Math.floor((now - past) / 1000);
 
+  if (seconds < 2) return `just now`;
   if (seconds < 60) return `${seconds}s ago`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -56,6 +64,22 @@ const formatTimestampAgo = (isoString) => {
   padding: 1rem 1.5rem;
 }
 
+/* STYLE DU BOUTON AJOUTÉ */
+.view-all-button {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.view-all-button:hover {
+  opacity: 0.8;
+}
+
 .blocks-list {
   padding: 0.5rem 1.5rem 1.5rem;
   display: flex;
@@ -70,6 +94,7 @@ const formatTimestampAgo = (isoString) => {
   border-radius: 0.75rem;
   background-color: rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s;
+  cursor: pointer; /* Curseur pour indiquer que c'est cliquable */
 }
 .block-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
@@ -89,25 +114,27 @@ const formatTimestampAgo = (isoString) => {
 
 .block-info {
   flex-grow: 1;
+  min-width: 0;
 }
 .block-number {
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 0.5rem 0; /* Marge inférieure augmentée */
+  margin: 0 0 0.5rem 0;
 }
 
-/* --- NOUVEAU STYLE POUR L'AFFICHAGE VERTICAL --- */
 .block-details {
   display: flex;
-  flex-direction: column; /* Aligne les éléments verticalement */
-  align-items: flex-start; /* Aligne le texte à gauche */
-  gap: 0.25rem; /* Espace réduit entre les lignes */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
   font-size: 0.875rem;
   color: var(--color-text-secondary);
 }
-.miner {
-  font-family: monospace;
-  font-size: 0.8rem;
+.block-hash-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .block-timestamp {

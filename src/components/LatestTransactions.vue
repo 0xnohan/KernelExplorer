@@ -3,23 +3,26 @@
     <div class="card-header">
       <Activity />
       <h3>Recent Transactions</h3>
+      <a href="#" @click.prevent="$emit('navigate', 'TransactionsPage')" class="view-all-button">
+        View All
+        <ExternalLink :size="14" />
+      </a>
     </div>
 
     <div class="transactions-list">
       <div v-for="tx in transactions" :key="tx.hash" class="transaction-item">
         <div class="icon-wrapper">
-          <ArrowLeftRight :size="20" class="text-purple" />
+          <CheckCircle2 :size="20" class="status-icon-success" />
         </div>
         <div class="tx-info">
-          <p class="tx-hash">{{ tx.hash }}</p>
+          <p class="tx-hash">{{ tx.hash.substring(0, 18) }}...</p>
           <div class="tx-details">
-            <span class="address">From: {{ tx.from }}</span>
-            <span class="address">To: {{ tx.to }}</span>
+            <span class="font-mono">{{ tx.from[0].substring(0, 8) }}... &rarr; {{ tx.to[0].substring(0, 8) }}...</span>
           </div>
         </div>
-        <div class="tx-amount">
-          <span class="amount-badge">{{ tx.amount }} ETH</span>
-          <span class="fee-text">Fee: {{ tx.fee.toFixed(6) }}</span>
+        <div class="tx-value">
+          <span class="tx-amount-value">{{ tx.value.toFixed(4) }} KNL</span>
+          <span class="tx-fee">Fee: {{ tx.fee.toFixed(6) }}</span>
         </div>
       </div>
     </div>
@@ -27,16 +30,45 @@
 </template>
 
 <script setup>
-import { Activity, ArrowLeftRight } from 'lucide-vue-next';
+import { Activity, CheckCircle2, ExternalLink } from 'lucide-vue-next';
 
 defineProps({
-  transactions: Array
+  // Limiter aux 5 dernières transactions pour la page d'accueil
+  transactions: {
+    type: Array,
+    default: () => []
+  }
 });
+
+defineEmits(['navigate']);
 </script>
 
 <style scoped>
+/* Styles inspirés de LatestBlocks.vue pour la cohérence */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+}
+
+.view-all-button {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-blue);
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+.view-all-button:hover {
+  opacity: 0.8;
+}
+
 .transactions-list {
-  padding: 0.5rem 1rem 1rem;
+  padding: 0.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -53,18 +85,30 @@ defineProps({
 .transaction-item:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
 .icon-wrapper {
+  background-color: rgba(52, 211, 153, 0.1); /* Vert pour le succès */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
+.status-icon-success {
+    color: #6ee7b7;
+}
+
 .tx-info {
   flex-grow: 1;
-  min-width: 0;
+  min-width: 0; /* Empêche le texte de déborder */
 }
 .tx-hash {
-  font-family: monospace;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-primary);
   margin: 0 0 0.25rem 0;
+  font-family: monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -72,30 +116,30 @@ defineProps({
 .tx-details {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
-.address {
+.font-mono {
   font-family: monospace;
+  font-size: 0.8rem;
 }
-.tx-amount {
-  text-align: right;
-  flex-shrink: 0;
-}
-.amount-badge {
-  background-color: rgba(197, 138, 249, 0.15);
-  color: var(--color-purple);
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 600;
+
+.tx-value {
+  margin-left: auto;
   font-size: 0.875rem;
-  display: inline-block;
-  margin-bottom: 0.25rem;
-}
-.fee-text {
-  font-size: 0.75rem;
   color: var(--color-text-secondary);
-  display: block;
+  white-space: nowrap;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.tx-amount-value {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+.tx-fee {
+    font-size: 0.75rem;
 }
 </style>

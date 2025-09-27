@@ -26,8 +26,8 @@
           />
         </div>
         <div class="lists-grid">
-          <LatestBlocks :blocks="latestBlocks" @navigate="(blockHash) => $emit('navigate', 'BlockDetailsPage', { blockHash })" />
-          <LatestTransactions :transactions="latestTransactions" @navigate="(page, props) => $emit('navigate', page, props)" />
+          <LatestBlocks :blocks="latestBlocks" @navigate="(page, params) => $emit('navigate', page, params)" />
+          <LatestTransactions :transactions="latestTransactions" @navigate="(page, params) => $emit('navigate', page, params)" />
         </div>
       </div>
     </div>
@@ -50,7 +50,7 @@ const allTransactions = ref([]);
 defineEmits(['navigate']);
 
 const stats = computed(() => [
-  { title: "Latest Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "+1 block/15s", changeType: "increase", color: "blue" },
+  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "+1 block/15s", changeType: "increase", color: "blue" },
   { title: "Total Transactions", value: allTransactions.value.length.toLocaleString(), change: "+150 TPS", changeType: "increase", color: "purple" },
   { title: "Network Hashrate", value: "N/A", change: "+2.3% today", changeType: "increase", color: "green" },
   { title: "Active Addresses", value: "N/A", change: "+5.7% week", changeType: "increase", color: "orange" }
@@ -61,27 +61,39 @@ const latestTransactions = computed(() => allTransactions.value.slice(0, 5));
 
 const getIconForStat = (title) => {
   const map = {
-    "Latest Block": Monitor, "Total Transactions": ArrowLeftRight,
+    "Current Block": Monitor, "Total Transactions": ArrowLeftRight,
     "Network Hashrate": Zap, "Active Addresses": Users
   };
   return map[title] || Monitor;
 };
 
-
 onMounted(async () => {
   loading.value = true;
   apiState.isConnecting = true;
   try {
+    // --- CORRECTION CI-DESSOUS ---
     const [blocksRes, txsRes] = await Promise.all([
       fetch(`${apiState.baseUrl}/api/blocks`),
+      fetch(`${apiState.baseUrl}/api/transactions`) // 1. APPEL API AJOUTÉ
     ]);
 
+    // On traite la réponse des blocs
     if (blocksRes.ok) {
       allBlocks.value = await blocksRes.json();
-      apiState.isConnected = true;
-    } else {
-      apiState.isConnected = false;
     }
+
+    // 2. LOGIQUE AJOUTÉE pour traiter la réponse des transactions
+    if (txsRes.ok) {
+        allTransactions.value = await txsRes.json();
+    }
+
+    // L'état de la connexion dépend du succès des deux appels
+    if (blocksRes.ok && txsRes.ok) {
+        apiState.isConnected = true;
+    } else {
+        apiState.isConnected = false;
+    }
+
   } catch (error) {
     console.error("Erreur de connexion:", error);
     apiState.isConnected = false;
@@ -93,9 +105,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* --- Styles inchangés --- */
 .hero-section {
   padding: 4rem 0;
-  background: transparent; /* Le fond est maintenant sur le body */
+  background: transparent;
   color: white;
   text-align: center;
 }
@@ -114,12 +127,26 @@ onMounted(async () => {
   margin: 0 auto;
 }
 .main-content-area {
-  margin-top: -2rem; /* Ajustement du positionnement */
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 .loading-message {
   text-align: center;
   padding: 4rem;
   font-size: 1.25rem;
   color: #e0e7ff;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+.lists-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 </style>
