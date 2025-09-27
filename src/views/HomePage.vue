@@ -14,8 +14,8 @@
       <div v-if="loading" class="loading-message">Loading Blockchain Data...</div>
       <div v-else>
         <div class="stats-grid">
-          <StatCard 
-            v-for="stat in stats" 
+          <StatCard
+            v-for="stat in stats"
             :key="stat.title"
             :title="stat.title"
             :value="stat.value"
@@ -73,12 +73,12 @@ onMounted(async () => {
   apiState.isConnecting = true;
   try {
     const [blocksRes, txsRes] = await Promise.all([
-      fetch(`${apiState.baseUrl}/api/blocks`), 
+      fetch(`${apiState.baseUrl}/api/blocks`),
     ]);
-    
+
     if (blocksRes.ok) {
       allBlocks.value = await blocksRes.json();
-      apiState.isConnected = true; 
+      apiState.isConnected = true;
     } else {
       apiState.isConnected = false;
     }
@@ -94,8 +94,8 @@ onMounted(async () => {
 
 <style scoped>
 .hero-section {
-  padding: 4rem 0 6rem 0;
-  background: linear-gradient(100deg, #4f46e5, #8b5cf6);
+  padding: 4rem 0;
+  background: transparent; /* Le fond est maintenant sur le body */
   color: white;
   text-align: center;
 }
@@ -113,25 +113,13 @@ onMounted(async () => {
   max-width: 600px;
   margin: 0 auto;
 }
-.search-bar-wrapper :deep(.search-input) {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-.search-bar-wrapper :deep(.search-input::placeholder) {
-  color: #c7d2fe;
-}
-.search-bar-wrapper :deep(.search-button) {
-  background-color: white;
-  color: #4f46e5;
-}
 .main-content-area {
-  margin-top: -4rem; 
+  margin-top: -2rem; /* Ajustement du positionnement */
 }
 .loading-message {
   text-align: center;
   padding: 4rem;
   font-size: 1.25rem;
-  color: #6b7280;
+  color: #e0e7ff;
 }
 </style>

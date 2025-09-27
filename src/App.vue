@@ -22,6 +22,7 @@
 </template>
 
 <script setup>
+// Le script reste identique
 import { ref, computed } from 'vue';
 import NavBar from './components/NavBar.vue';
 import ConnectionModal from './components/ConnectionModal.vue';
@@ -79,8 +80,6 @@ const handleNavigation = (pageName, props = {}) => {
 .main-content {
   overflow-y: auto;
   height: 100vh;
-  background-color: #f9fafb;
-  display: flex; 
-  flex-direction: column; 
+  /* La couleur de fond est retirée pour laisser le body visible */
 }
 </style>

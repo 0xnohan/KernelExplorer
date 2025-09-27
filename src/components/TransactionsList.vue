@@ -1,144 +1,91 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <div class="title-container">
-        <Activity class="title-icon" />
-        <h3>Transactions</h3>
-      </div>
+      <Activity />
+      <h3>Latest Transactions</h3>
     </div>
-
     <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Transaction Hash</th>
-            <th>From → To</th>
-            <th>Value</th>
-            <th>Fee</th>
-            <th>Status</th>
-            <th>Block</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="tx in transactions" :key="tx.hash">
-            <td>
-              <span class="font-mono text-blue">{{ tx.hash }}</span>
-            </td>
-            <td>
-              <div class="address-group">
-                <span> <span class="font-mono">{{ tx.from }}</span>→ <span class="font-mono">{{ tx.to }}</span></span>
-              </div>
-            </td>
-            <td>
-              <span class="font-semibold">{{ tx.amount }} KNL</span>
-            </td>
-            <td>
-              <span>{{ tx.fee.toFixed(6) }}</span>
-            </td>
-            <td>
-              <span class="status-badge" :class="tx.status === 'success' ? 'status-success' : 'status-failed'">
-                <CheckCircle v-if="tx.status === 'success'" :size="14" />
-                <XCircle v-else :size="14" />
-                {{ tx.status }}
-              </span>
-            </td>
-            <td>
-              <span class="text-blue">#{{ tx.block_number.toLocaleString() }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-header">
+        <span class="col-hash">Transaction Hash</span>
+        <span class="col-from-to">From → To</span>
+        <span class="col-value">Value</span>
+        <span class="col-fee">Fee</span>
+        <span class="col-status">Status</span>
+        <span class="col-block">Block</span>
+      </div>
+      <div class="table-body">
+        <div v-for="tx in transactions" :key="tx.hash" class="table-row">
+          <div class="col-hash font-mono">
+            <a href="#">{{ tx.hash }}</a>
+          </div>
+          <div class="col-from-to font-mono">
+            <a href="#">{{ tx.from }}</a> → <a href="#">{{ tx.to }}</a>
+          </div>
+          <div class="col-value">{{ tx.amount }} ETH</div>
+          <div class="col-fee">{{ tx.fee.toFixed(6) }}</div>
+          <div class="col-status">
+            <span class="status-badge" :class="tx.status">
+              {{ tx.status }}
+            </span>
+          </div>
+          <div class="col-block">
+            <a href="#">#{{ tx.block_number.toLocaleString() }}</a>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Activity, CheckCircle, XCircle } from 'lucide-vue-next';
-
-defineProps({
-  transactions: Array
-});
+import { Activity } from 'lucide-vue-next';
+defineProps({ transactions: Array });
 </script>
 
 <style scoped>
-.card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
-  color: #111827;
-}
-.card-header {
-  padding: 1.5rem;
-}
-.title-container {
-  display: flex;
+.table-container { padding: 1rem; }
+.table-header, .table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1fr;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 1.25rem;
-  font-weight: 600;
+  gap: 1rem;
+  padding: 0 1rem;
 }
-.title-icon {
-  width: 24px;
-  height: 24px;
-}
-.table-container {
-  overflow-x: auto;
-}
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th {
-  padding: 0.75rem 1.5rem;
-  text-align: left;
-  font-size: 0.75rem;
-  color: #6b7280;
+.table-header {
+  color: var(--color-text-secondary);
+  font-size: 0.8rem;
   text-transform: uppercase;
   font-weight: 500;
-  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--glass-border);
 }
-td {
-  padding: 1rem 1.5rem;
-  font-size: 0.875rem;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
+.table-row {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  transition: background-color 0.2s ease;
 }
-tbody tr:last-child td {
-  border-bottom: none;
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background-color: rgba(255, 255, 255, 0.05); }
+.col-hash, .col-from-to {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-.font-semibold { font-weight: 600; }
-.font-mono { 
-  font-family: monospace;
-  font-size: 0.8rem;
-}
-.text-blue { color: #3b82f6; }
-
-.address-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
+a { color: var(--color-blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
 .status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
+  padding: 0.25rem 0.6rem;
   border-radius: 9999px;
   font-weight: 500;
   font-size: 0.75rem;
+  text-transform: capitalize;
 }
-.status-success {
-  background-color: #f0fdf4;
-  color: #16a34a;
+.status-badge.success {
+  background-color: rgba(129, 201, 149, 0.15);
+  color: var(--color-green);
 }
-.status-failed {
-  background-color: #fef2f2;
-  color: #ef4444;
+.status-badge.failed {
+  background-color: rgba(255, 117, 117, 0.15);
+  color: var(--color-red);
 }
 </style>

@@ -16,6 +16,7 @@ defineEmits(['navigate']);
 
 onMounted(async () => {
   try {
+    // Note: L'URL de l'API a été mise à jour pour correspondre à la discussion précédente
     const response = await fetch('http://127.0.0.1:8001/api/blocks');
     blocks.value = await response.json();
   } catch (error) {
@@ -28,12 +29,13 @@ onMounted(async () => {
 
 <style scoped>
 .container {
-  padding: 2rem;
+  padding: 2rem 2.5rem; /* Padding augmenté pour plus d'espace */
 }
+
 .loading-message {
   text-align: center;
   padding: 4rem;
   font-size: 1.25rem;
-  color: #6b7280;
+  color: var(--color-text-secondary); /* Couleur claire pour la lisibilité */
 }
 </style>

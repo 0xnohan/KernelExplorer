@@ -27,8 +27,11 @@ import { ref } from 'vue';
 
 const emit = defineEmits(['close', 'save']);
 
-const ip = ref('127.0.0.1');
-const port = ref('5000');
+// Les valeurs par défaut sont extraites de l'URL sauvegardée si elle existe
+const savedUrl = localStorage.getItem('kernelApiUrl') || 'http://127.0.0.1:5000';
+const urlParts = savedUrl.replace('http://', '').split(':');
+const ip = ref(urlParts[0] || '127.0.0.1');
+const port = ref(urlParts[1] || '5000');
 
 const handleSave = () => {
   if (ip.value && port.value) {
@@ -36,66 +39,98 @@ const handleSave = () => {
   }
 };
 </script>
+
 <style scoped>
+/* --- NOUVEAU STYLE GLASSMORPHISME POUR LA MODALE --- */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(10, 5, 40, 0.5); /* Fond overlay plus sombre */
+  -webkit-backdrop-filter: blur(10px); /* Effet de flou sur l'arrière-plan */
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 15vh;   
+  align-items: center;
   z-index: 1000;
 }
+
 .modal-content {
   width: 90%;
   max-width: 400px;
+  /* La classe .card du main.css applique déjà le style glass */
 }
+
+/* Le card-header est déjà stylé globalement */
+
 .form-container {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem; /* Espace augmenté */
 }
+
 .form-group {
   display: flex;
   flex-direction: column;
 }
+
 .form-group label {
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #d1d5db;
+  color: var(--color-text-secondary);
 }
+
 .form-group input {
-  padding: 0.75rem;
-  border-radius: 6px;
-  border: 1px solid #4b5563;
-  background-color: #1f2937;
-  color: #f9fafb;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-primary);
   font-size: 1rem;
+  transition: all 0.2s ease;
 }
+
+.form-group input:focus {
+  outline: none;
+  border-color: rgba(129, 140, 248, 0.7);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
 .button-group {
   margin-top: 1rem;
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
+
 button {
-  padding: 0.75rem 1rem;
-  border-radius: 6px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
   border: none;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
+
 .button-cancel {
   background-color: transparent;
-  color: #9ca3af;
+  color: var(--color-text-secondary);
 }
+
+.button-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
 .button-save {
-  background-color: #8ab4f8;
-  color: #111827;
+  background-color: #818cf8;
+  color: #1e1b4b;
+}
+
+.button-save:hover {
+  background-color: #a5b4fc;
 }
 </style>
