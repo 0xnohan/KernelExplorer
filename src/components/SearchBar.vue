@@ -1,8 +1,8 @@
 <template>
   <div class="search-container">
-    <input 
-      type="text" 
-      class="search-input" 
+    <input
+      type="text"
+      class="search-input"
       placeholder="Search by block number, transaction hash, or address..."
     >
     <button type="submit" class="search-button">
@@ -19,6 +19,9 @@ import { Search } from 'lucide-vue-next';
 .search-container {
   display: flex;
   align-items: center;
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
   padding: 0.25rem;
   padding-left: 1rem;
 }
@@ -26,8 +29,7 @@ import { Search } from 'lucide-vue-next';
 .search-input {
   flex-grow: 1;
   background: none;
-  border: 1px solid transparent;
-  border-radius: 0.5rem;
+  border: none;
   padding: 0.75rem 0.5rem;
   color: white;
   font-size: 1rem;
@@ -40,20 +42,18 @@ import { Search } from 'lucide-vue-next';
 }
 
 .search-button {
-  background-color: white;
-  color: #4f46e5;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
   border: none;
   border-radius: 6px;
   padding: 0.6rem;
   cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
   transition: background-color 0.2s ease;
 }
 
 .search-button:hover {
-  background-color: #e0e7ff;
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .icon {

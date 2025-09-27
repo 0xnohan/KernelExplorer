@@ -1,33 +1,28 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <div class="title-container">
-        <Activity class="title-icon" />
-        <h3>Recent Transactions</h3>
-      </div>
-      <button class="view-all-button" @click="goToTransactionsPage">
-        <span>View All</span>
-        <ExternalLink :size="16" />
-      </button>
+      <Activity />
+      <h3>Recent Transactions</h3>
+      <a href="#" @click.prevent="$emit('navigate', 'TransactionsPage')" class="view-all-button">
+        View All
+        <ExternalLink :size="14" />
+      </a>
     </div>
 
     <div class="transactions-list">
       <div v-for="tx in transactions" :key="tx.hash" class="transaction-item">
-        <div class="icon-wrapper" :class="tx.status === 'success' ? 'bg-green-light' : 'bg-red-light'">
-          <CheckCircle v-if="tx.status === 'success'" :size="20" class="text-green" />
-          <XCircle v-else :size="20" class="text-red" />
+        <div class="icon-wrapper">
+          <CheckCircle2 :size="20" class="status-icon-success" />
         </div>
         <div class="tx-info">
-          <p class="tx-hash">{{ tx.hash }}</p>
+          <p class="tx-hash">{{ tx.hash.substring(0, 18) }}...</p>
           <div class="tx-details">
-            <span class="address clickable" @click="goToAddress(tx.from)">{{ tx.from }}</span>
-            <ArrowRight :size="14" class="arrow-icon" />
-            <span class="address clickable" @click="goToAddress(tx.to)">{{ tx.to }}</span>
+            <span class="font-mono">{{ tx.from[0].substring(0, 8) }}... &rarr; {{ tx.to[0].substring(0, 8) }}...</span>
           </div>
         </div>
-        <div class="tx-amount">
-          <span class="amount-badge">{{ tx.amount }} KNL</span>
-          <span class="fee-text">Fee: {{ tx.fee.toFixed(6) }}</span>
+        <div class="tx-value">
+          <span class="tx-amount-value">{{ tx.value.toFixed(4) }} KNL</span>
+          <span class="tx-fee">Fee: {{ tx.fee.toFixed(6) }}</span>
         </div>
       </div>
     </div>
@@ -35,86 +30,62 @@
 </template>
 
 <script setup>
-import { Activity, ExternalLink, CheckCircle, XCircle, ArrowRight } from 'lucide-vue-next';
+import { Activity, CheckCircle2, ExternalLink } from 'lucide-vue-next';
 
 defineProps({
-  transactions: Array
+  transactions: {
+    type: Array,
+    default: () => []
+  }
 });
 
-const emit = defineEmits(['navigate-to-transactions', 'navigate-to-address']);
-
-const goToTransactionsPage = () => {
-  emit('navigate-to-transactions');
-};
-
-const goToAddress = (address) => {
-  emit('navigate-to-address'); 
-}
+defineEmits(['navigate']);
 </script>
 
 <style scoped>
 .card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.title-container {
-  display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.title-icon {
-  width: 20px;
-  height: 20px;
+  padding: 1rem 1.5rem;
 }
 
 .view-all-button {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
+  gap: 0.25rem;
   font-size: 0.875rem;
+  color: var(--color-blue);
+  text-decoration: none;
   font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
 .view-all-button:hover {
-  background-color: #f9fafb;
-  color: #111827;
+  opacity: 0.8;
 }
 
 .transactions-list {
-  padding: 1.5rem;
+  padding: 0.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
 }
-
 .transaction-item {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  transition: box-shadow 0.2s;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s;
 }
 .transaction-item:hover {
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .icon-wrapper {
+  background-color: rgba(52, 211, 153, 0.1); 
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -123,66 +94,50 @@ const goToAddress = (address) => {
   justify-content: center;
   flex-shrink: 0;
 }
-.bg-green-light { background-color: #f0fdf4; }
-.text-green { color: #16a34a; }
-.bg-red-light { background-color: #fef2f2; }
-.text-red { color: #ef4444; }
+.status-icon-success {
+    color: #6ee7b7;
+}
 
 .tx-info {
   flex-grow: 1;
-  min-width: 0; /* Empêche le débordement de texte */
+  min-width: 0; 
 }
-
 .tx-hash {
-  font-family: monospace;
-  font-weight: 500;
-  color: #111827;
+  font-weight: 600;
+  color: var(--color-text-primary);
   margin: 0 0 0.25rem 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tx-details {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-.address {
   font-family: monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.arrow-icon {
-  flex-shrink: 0;
-}
-
-.tx-amount {
-  text-align: right;
-}
-
-.amount-badge {
-  background-color: #f5f3ff;
-  color: #7c3aed;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 500;
+.tx-details {
   font-size: 0.875rem;
-  display: inline-block;
-  margin-bottom: 0.25rem;
+  color: var(--color-text-secondary);
+}
+.font-mono {
+  font-family: monospace;
+  font-size: 0.8rem;
 }
 
-.fee-text {
-  font-size: 0.75rem;
-  color: #6b7280;
-  display: block;
+.tx-value {
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
-
-.clickable:hover {
-  text-decoration: underline;
-  cursor: pointer;
+.tx-amount-value {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+}
+.tx-fee {
+    font-size: 0.75rem;
 }
 </style>

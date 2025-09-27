@@ -1,149 +1,286 @@
 <template>
   <div class="container">
-    <div class="card header-card">
-      <div class="address-info">
-        <QrCode :size="48" class="qr-icon" />
-        <div>
-          <p class="address-label">ADDRESS</p>
-          <h1 class="address-hash">{{ address.address }}</h1>
-        </div>
+    <div v-if="loading" class="loading-message">Loading Address Details...</div>
+    <div v-else-if="addressDetails">
+      <div class="page-header">
+        <button class="back-button" @click="$emit('navigate', 'HomePage')">
+          <ArrowLeft />
+        </button>
+        <h1 class="page-title">Address Details</h1>
       </div>
-      <div class="balance-info">
-        <p class="balance-label">AVAILABLE BALANCE</p>
-        <h1 class="balance-amount">{{ address.balance }} KNL</h1>
-      </div>
-    </div>
 
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <p class="stat-label">UNSPENT TRANSACTIONS</p>
-        <p class="stat-value">{{ address.unspent_tx_count }}</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL TRANSACTIONS</p>
-        <p class="stat-value">{{ address.total_tx_count }}</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL RECEIVED</p>
-        <p class="stat-value">{{ address.total_received }} KNL</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL SENT</p>
-        <p class="stat-value">{{ address.total_sent }} KNL</p>
-      </div>
-    </div>
-
-    <h2 class="section-title">Unspent Outputs (UTXOs)</h2>
-    <div class="transactions-container">
-      <div v-for="tx in address.utxos" :key="tx.hash" class="card transaction-card">
-        <p class="tx-hash font-mono">{{ tx.hash }}</p>
-        <div class="io-grid">
-          <div>
-            <h4 class="io-title">INPUTS</h4>
-            <div v-for="(input, index) in tx.inputs" :key="index" class="io-item">
-              <span class="io-index">#{{ index }}</span>
-              <span class="font-mono coinbase">{{ input.address }}</span>
-            </div>
+      <div class="card info-card">
+        <h2 class="card-title">Address Information</h2>
+        <div class="info-grid">
+          <div class="detail-row">
+            <span class="label"><MapPin class="icon" />Address</span>
+            <span class="value font-mono hash-link">{{ addressDetails.address }}</span>
           </div>
-          <div>
-            <h4 class="io-title">OUTPUTS</h4>
-            <div v-for="(output, index) in tx.outputs" :key="index" class="io-item">
-              <span class="io-index">#{{ index }}</span>
-              <span class="font-mono text-blue">{{ output.address }}</span>
-              <span class="amount-badge">{{ output.amount }} KNL</span>
-            </div>
+          <div class="detail-row">
+            <span class="label"><Wallet class="icon" />Balance</span>
+            <span class="value balance-amount">{{ addressDetails.current_balance }} KNL</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><ArrowLeftRight class="icon" />Transaction Count</span>
+            <span class="value">
+              <span class="tx-badge">{{ addressDetails.transaction_count }}</span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><DownloadCloud class="icon" />Total Received</span>
+            <span class="value">{{ addressDetails.total_received }} KNL</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><UploadCloud class="icon" />Total Sent</span>
+            <span class="value">{{ addressDetails.total_sent }} KNL</span>
           </div>
         </div>
       </div>
+
+      <div class="card tx-card">
+        <h2 class="card-title">Transaction History ({{ addressDetails.transactions.length }})</h2>
+        <div v-if="addressDetails.transactions.length > 0" class="list-container">
+           <div class="list-header">
+              <span>Txn Hash</span>
+              <span>Block</span>
+              <span>From</span>
+              <span>To</span>
+              <span class="text-right">Value</span>
+            </div>
+            <div class="list-body">
+              <div v-for="tx in addressDetails.transactions" :key="tx.hash" class="list-row">
+                <div class="txn-hash-cell">
+                  <CheckCircle2 size="18" class="status-icon-success" />
+                  <span class="font-mono hash-link" @click="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })">{{ tx.hash.substring(0, 15) }}...</span>
+                </div>
+                
+                <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="hash-link">{{ tx.block_height }}</a>
+
+                <span v-if="tx.from[0] === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
+                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ tx.from[0].substring(0, 15) }}...</a>
+
+                <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: findMainRecipient(tx.to, tx.from, true) })" class="font-mono hash-link address-to">
+                  <ArrowRight size="14" />
+                  {{ findMainRecipient(tx.to, tx.from) }}...
+                </a>
+                
+                <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
+                  {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KNL
+                </span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-data-message">
+            No transactions found for this address
+          </div>
+      </div>
     </div>
+     <div v-else class="loading-message">Address not found</div>
   </div>
 </template>
 
 <script setup>
-import { QrCode } from 'lucide-vue-next';
-import { mockAddressDetails } from '../data/mockData.js';
-const address = mockAddressDetails;
+import { ref, onMounted } from 'vue';
+import { apiState } from '../store.js';
+import { ArrowLeft, MapPin, Wallet, ArrowLeftRight, DownloadCloud, UploadCloud, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
+
+const props = defineProps({
+  addressHash: { type: String, required: true }
+});
+
+defineEmits(['navigate']);
+
+const loading = ref(true);
+const addressDetails = ref(null);
+
+const findMainRecipient = (outputs, inputs, fullAddress = false) => {
+  const recipientOutput = outputs.find(out => !inputs.includes(out.address));
+  const address = recipientOutput ? recipientOutput.address : (outputs[0] ? outputs[0].address : '');
+  return fullAddress ? address : address.substring(0, 12);
+};
+
+onMounted(async () => {
+  if (!props.addressHash) return;
+  loading.value = true; 
+  try {
+    const response = await fetch(`${apiState.baseUrl}/api/address/${props.addressHash}`); 
+    if (response.ok) {
+      addressDetails.value = await response.json();
+    }
+  } catch (error) {
+    console.error(`Impossible to fetch address details for ${props.addressHash}:`, error);
+  } finally {
+    loading.value = false;
+  }
+});
 </script>
 
 <style scoped>
 .container {
-  padding: 2rem;
-  color: #111827;
+  padding: 2rem 2.5rem;
+}
+.loading-message {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
 }
 
-.header-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  margin-bottom: 2rem;
-}
-.address-info {
+.page-header {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-bottom: 2rem;
 }
-.qr-icon {
-  color: #6b7280;
+.back-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
-.address-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
-.address-hash {
-  font-family: monospace;
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.card {
+  margin-bottom: 2rem;
+}
+.card-title {
   font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   font-weight: 500;
 }
-.balance-info {
-  text-align: right;
+.label .icon {
+  width: 16px;
+  height: 16px;
+  color: #a5b4fc;
 }
-.balance-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #6b7280;
+.value {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+.font-mono {
+  font-family: monospace;
+}
+a.hash-link {
+  color: var(--color-blue);
+  cursor: pointer;
+  text-decoration: none;
+}
+a.hash-link:hover {
+    text-decoration: underline;
 }
 .balance-amount {
-  font-size: 2rem;
   font-weight: 700;
-  color: #16a34a;
+  color: #6ee7b7;
+}
+.tx-badge {
+    background-color: rgba(129, 140, 248, 0.2);
+    color: #a5b4fc;
+    padding: 0.35rem 0.75rem;
+    border-radius: 6px;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-}
-.stat-card {
-  padding: 1.5rem;
+.no-data-message {
+  padding: 2rem 1.5rem;
   text-align: center;
+  color: var(--color-text-secondary);
 }
-.stat-label {
+.list-container {
+  padding: 0 1.5rem 1.5rem;
+}
+.list-header, .list-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.2fr 1.2fr 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+.list-header {
+  padding: 1rem 0;
   font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.list-body {
+  display: flex;
+  flex-direction: column;
+}
+.list-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+.list-row:last-child {
+  border-bottom: none;
+}
+
+.text-right {
+  text-align: right;
+}
+.address-to {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.value-col {
   font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
 }
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
+.text-green {
+  color: #6ee7b7;
+}
+.text-red {
+  color: #fca5a5;
+}
+.txn-hash-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.status-icon-success {
+  color: #6ee7b7;
 }
 
-
-.section-title { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; }
-.card { background-color: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); }
-.transactions-container { display: flex; flex-direction: column; gap: 1.5rem; }
-.transaction-card { padding: 1.5rem; }
-.tx-hash { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #e5e7eb; word-break: break-all; }
-.io-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-@media (min-width: 768px) { .io-grid { grid-template-columns: 1fr 1fr; } }
-.io-title { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #6b7280; margin: 0 0 1rem 0; }
-.io-item { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; background-color: #f9fafb; padding: 0.75rem; border-radius: 6px; }
-.io-index { font-size: 0.75rem; font-weight: 500; background-color: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 4px; }
-.coinbase { color: #6b7280; }
-.amount-badge { margin-left: auto; background-color: #f0fdf4; color: #16a34a; padding: 0.25rem 0.75rem; border-radius: 9999px; font-weight: 500; font-size: 0.875rem; white-space: nowrap; }
-.font-mono { font-family: monospace; }
-.text-blue { color: #3b82f6; }
+.coinbase-text {
+    color: #fcd34d; 
+    font-weight: 600;
+}
 </style>

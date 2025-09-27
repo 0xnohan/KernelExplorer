@@ -1,149 +1,260 @@
 <template>
   <div class="container">
-    <div class="card header-card">
-      <div class="address-info">
-        <QrCode :size="40" class="qr-icon" />
-        <div>
-          <p class="address-label">ADDRESS</p>
-          <h1 class="address-hash">{{ address.address }}</h1>
-        </div>
+    <div v-if="loading" class="loading-message">Loading Block Details...</div>
+    <div v-else-if="block">
+      <div class="page-header">
+        <button class="back-button" @click="$emit('navigate', 'BlocksPage')">
+          <ArrowLeft />
+        </button>
+        <h1 class="page-title">Block {{ block.block_number }}</h1>
       </div>
-      <div class="balance-info">
-        <p class="balance-label">AVAILABLE BALANCE</p>
-        <h1 class="balance-amount">{{ address.balance }} KNL</h1>
-      </div>
-    </div>
 
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <p class="stat-label">UNSPENT TRANSACTIONS</p>
-        <p class="stat-value">{{ address.unspent_tx_count }}</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL TRANSACTIONS</p>
-        <p class="stat-value">{{ address.total_tx_count }}</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL RECEIVED</p>
-        <p class="stat-value">{{ address.total_received }} KNL</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL SENT</p>
-        <p class="stat-value">{{ address.total_sent }} KNL</p>
-      </div>
-    </div>
-
-    <h2 class="section-title">Unspent Outputs (UTXOs)</h2>
-    <div class="transactions-container">
-      <div v-for="tx in address.utxos" :key="tx.hash" class="card transaction-card">
-        <p class="tx-hash font-mono">{{ tx.hash }}</p>
-        <div class="io-grid">
-          <div>
-            <h4 class="io-title">INPUTS</h4>
-            <div v-for="(input, index) in tx.inputs" :key="index" class="io-item">
-              <span class="io-index">#{{ index }}</span>
-              <span class="font-mono coinbase">{{ input.address }}</span>
-            </div>
+      <div class="card info-card">
+        <h2 class="card-title">Block Information</h2>
+        <div class="info-grid">
+          <div class="detail-row">
+            <span class="label"><Hash class="icon" />Block Hash</span>
+            <span class="value font-mono hash-link">{{ block.hash }}</span>
           </div>
-          <div>
-            <h4 class="io-title">OUTPUTS</h4>
-            <div v-for="(output, index) in tx.outputs" :key="index" class="io-item">
-              <span class="io-index">#{{ index }}</span>
-              <span class="font-mono text-blue">{{ output.address }}</span>
-              <span class="amount-badge">{{ output.amount }} KNL</span>
-            </div>
+          <div class="detail-row">
+            <span class="label"><ArrowLeft class="icon" />Previous Hash</span>
+            <span class="value font-mono hash-link">{{ block.previous_hash }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><Clock class="icon" />Timestamp</span>
+            <span class="value">{{ new Date(block.timestamp).toLocaleString() }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><ArrowLeftRight class="icon" />Transactions</span>
+            <span class="value">
+              <span class="tx-badge">{{ block.transaction_count }} transactions</span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><User class="icon" />Miner</span>
+            <span class="value font-mono">{{ block.miner }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><Zap class="icon" />Block Size / Block Limit</span>
+            <span class="value">{{ block.size }} bytes / 1 000 000 bytes ({{ ((block.size / 1000000) * 100).toFixed(2) }}%)</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><Gift class="icon" />Block Reward</span>
+            <span class="value">
+              <span class="reward-badge">{{ block.reward }} KNL</span>
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><FileBox class="icon" />Merkle Root</span>
+            <span class="value">{{ block.merkle_root }}</span>
           </div>
         </div>
       </div>
+
+      <div class="card tx-card">
+        <h2 class="card-title">{{ block.transactions.length }} transaction(s) in Block {{ block.block_number }} </h2>
+        <div class="list-container">
+           <div class="list-header">
+            <span>Txn Hash</span>
+            <span>From</span>
+            <span>To</span>
+            <span class="text-right">Value</span>
+          </div>
+          <div class="list-body">
+            <div v-for="tx in block.transactions" :key="tx.hash" class="list-row">
+              <div class="txn-hash-cell">
+                <CheckCircle2 size="18" class="status-icon-success" />
+                <span class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</span>
+              </div>
+              <span class="font-mono">{{ tx.inputs[0].address.includes('Coinbase') ? 'Coinbase' : tx.inputs[0].address.substring(0, 15) + '...' }}</span>
+              <span class="font-mono">{{ tx.outputs[0].address.substring(0, 15) }}...</span>
+              <span class="text-right">{{ tx.outputs[0].amount }} KNL</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+    <div v-else class="loading-message">Block not found.</div>
   </div>
 </template>
 
 <script setup>
-import { QrCode } from 'lucide-vue-next';
-import { mockAddressDetails } from '../data/mockData.js';
-const address = mockAddressDetails;
+import { ref, onMounted } from 'vue';
+import { apiState } from '../store.js';
+import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2 } from 'lucide-vue-next';
+
+const props = defineProps({
+  blockHash: { type: String, required: true }
+});
+
+defineEmits(['navigate']);
+
+const loading = ref(true);
+const block = ref(null);
+
+onMounted(async () => {
+  if (!props.blockHash) return;
+  apiState.isConnecting = true;
+  try {
+    const response = await fetch(`${apiState.baseUrl}/api/block/${props.blockHash}`); 
+    if (response.ok) {
+      block.value = await response.json();
+      apiState.isConnected = true;
+    } else {
+      apiState.isConnected = false;
+    }
+  } catch (error) {
+    console.error(`Impossible to fetch block details for ${props.blockHash}:`, error);
+    apiState.isConnected = false;
+  } finally {
+    loading.value = false;
+    apiState.isConnecting = false;
+  }
+});
 </script>
 
 <style scoped>
 .container {
-  padding: 2rem;
-  color: #111827;
+  padding: 2rem 2.5rem;
+}
+.loading-message {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
 }
 
-.header-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem; 
-  margin-bottom: 1.5rem;
-}
-.address-info {
+.page-header {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-.qr-icon {
-  color: #6b7280;
-}
-.address-label {
-  font-size: 0.7rem; 
-  font-weight: 600;
-  color: #6b7280;
-}
-.address-hash {
-  font-family: monospace;
-  font-size: 1rem; 
-  font-weight: 500;
-}
-.balance-info {
-  text-align: right;
-}
-.balance-label {
-  font-size: 0.7rem; 
-  font-weight: 600;
-  color: #6b7280;
-}
-.balance-amount {
-  font-size: 1.5rem; 
-  font-weight: 700;
-  color: #16a34a;
-}
-
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem; 
   margin-bottom: 2rem;
 }
-.stat-card {
-  padding: 1rem; 
-  text-align: center;
+.back-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
-.stat-label {
-  font-size: 0.7rem; 
-  font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
-.stat-value {
-  font-size: 1.5rem; 
-  font-weight: 700;
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
 }
 
-.section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
-.card { background-color: white; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05); }
-.transactions-container { display: flex; flex-direction: column; gap: 1rem; }
-.transaction-card { padding: 1rem; }
-.tx-hash { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb; word-break: break-all; font-size: 0.875rem; }
-.io-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-@media (min-width: 768px) { .io-grid { grid-template-columns: 1fr 1fr; } }
-.io-title { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: #6b7280; margin: 0 0 0.5rem 0; }
-.io-item { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; background-color: #f9fafb; padding: 0.5rem; border-radius: 6px; }
-.io-index { font-size: 0.7rem; font-weight: 500; background-color: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 4px; }
-.coinbase { color: #6b7280; }
-.amount-badge { margin-left: auto; background-color: #f0fdf4; color: #16a34a; padding: 0.2rem 0.6rem; border-radius: 9999px; font-weight: 500; font-size: 0.8rem; white-space: nowrap; }
-.font-mono { font-family: monospace; }
-.text-blue { color: #3b82f6; }
+.card {
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+}
+.label .icon {
+  width: 16px;
+  height: 16px;
+  color: #a5b4fc;
+}
+.value {
+  color: var(--color-text-primary);
+}
+.font-mono {
+  font-family: monospace;
+}
+.hash-link {
+  color: var(--color-blue);
+  cursor: pointer;
+}
+
+.tx-badge {
+  background-color: rgba(129, 140, 248, 0.2);
+  color: #a5b4fc;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+}
+.reward-badge {
+  background-color: rgba(52, 211, 153, 0.2);
+  color: #6ee7b7;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+}
+
+.list-container {
+  padding: 0 1.5rem 1.5rem;
+}
+.list-header, .list-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr 1.2fr 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+.list-header {
+  padding: 1rem 0;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.list-body {
+  display: flex;
+  flex-direction: column;
+}
+.list-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+.list-row:last-child {
+  border-bottom: none;
+}
+.text-right {
+  text-align: right;
+}
+.txn-hash-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.status-icon-success {
+  color: #6ee7b7;
+}
 </style>

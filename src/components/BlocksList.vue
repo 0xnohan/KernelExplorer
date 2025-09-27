@@ -7,58 +7,47 @@
       </div>
     </div>
 
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Block</th>
-            <th>Timestamp</th>
-            <th>Transactions</th>
-            <th>Miner</th>
-            <th>Block Size Used</th>
-            <th>Reward</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="block in blocks" :key="block.height">
-            <td>
-              <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage')" class="cell-content clickable">
-                <Package class="cell-icon text-blue" />
-                <span class="font-semibold">#{{ block.height.toLocaleString() }}</span>
-              </a>
-            </td>
-            <td>
-              <div class="cell-content">
-                <Clock class="cell-icon" />
-                <span>{{ formatTimestamp(block.timestamp) }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <ArrowLeftRight class="cell-icon" />
-                <span>{{ block.txns }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <User class="cell-icon" />
-                <span class="font-mono">{{ block.miner }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="cell-content">
-                <Zap class="cell-icon text-yellow" />
-                <span>{{ ((block.block_size / block.block_limit) * 100).toFixed(1) }}%</span>
-              </div>
-            </td>
-            <td>
-              <span class="reward-badge">
-                {{ block.reward }} KNL
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="list-container">
+      <div class="list-header">
+        <span>Block</span>
+        <span>Timestamp</span>
+        <span>Transactions</span>
+        <span>Miner</span>
+        <span>Gas Used</span>
+        <span class="text-right">Reward</span>
+      </div>
+
+      <div class="list-body">
+        <div v-for="block in blocks" :key="block.height" class="list-row">
+          <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: block.hash })" class="cell-content block-height">
+            <Package class="cell-icon" />
+            <span>{{ block.height }}</span>
+          </a>
+          <div class="cell-content">
+            <Clock class="cell-icon" />
+            <span>{{ formatTimestamp(block.timestamp) }}</span>
+          </div>
+          <div class="cell-content">
+            <ArrowLeftRight class="cell-icon" />
+            <span>{{ block.transaction_count }}</span>
+          </div>
+          <div class="cell-content">
+            <User class="cell-icon" />
+            <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: block.miner })" class="font-mono miner-link">
+              {{ block.miner }}
+            </a>
+          </div>
+          <div class="cell-content">
+            <Zap class="cell-icon text-yellow" />
+            <span>{{ block.size_used }}%</span>
+          </div>
+          <div class="text-right">
+            <span class="reward-badge">
+              {{ block.reward }} KNL
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -81,13 +70,10 @@ const formatTimestamp = (isoString) => {
 
 <style scoped>
 .card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+  overflow: hidden;
 }
 .card-header {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 .title-container {
   display: flex;
@@ -95,73 +81,90 @@ const formatTimestamp = (isoString) => {
   gap: 0.75rem;
   font-size: 1.25rem;
   font-weight: 600;
-  color: #111827;
 }
-.title-icon {
-  width: 24px;
-  height: 24px;
+.list-container {
+  padding: 0 1.5rem 1.5rem;
 }
-
-.table-container {
-  overflow-x: auto;
+.list-header, .list-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.5fr 1fr 2fr 1fr 1fr;
+  gap: 1rem;
+  align-items: center;
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th {
-  padding: 0.75rem 1.5rem;
-  text-align: left;
+.list-header {
+  padding: 1rem 0;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   font-weight: 500;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-td {
-  padding: 1rem 1.5rem;
+.list-body {
+  display: flex;
+  flex-direction: column;
+}
+.list-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 0.875rem;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
 }
-tbody tr:last-child td {
+.list-row:last-child {
   border-bottom: none;
 }
-tbody tr:hover {
-  background-color: #f9fafb;
-}
-
 .cell-content {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: var(--color-text-secondary);
 }
 .cell-icon {
   width: 16px;
   height: 16px;
-  color: #9ca3af;
+  color: #a5b4fc;
+  flex-shrink: 0;
 }
-.font-semibold { font-weight: 600; }
-.font-mono { font-family: monospace; }
-.text-blue { color: #3b82f6; }
-.text-yellow { color: #f59e0b; }
+.block-height {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.block-height:hover {
+  color: var(--color-blue);
+}
+.block-height .cell-icon {
+  color: var(--color-blue);
+}
+.font-mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
 
+.miner-link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.miner-link:hover {
+  color: var(--color-blue);
+  text-decoration: underline;
+}
+.text-yellow {
+  color: #fcd34d;
+}
 .reward-badge {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  padding: 0.25rem 0.75rem;
+  background-color: rgba(52, 211, 153, 0.2);
+  color: #6ee7b7;
+  padding: 0.35rem 0.75rem;
   border-radius: 9999px;
   font-weight: 500;
   font-size: 0.875rem;
 }
-
-.clickable {
-  text-decoration: none;
-  color: inherit;
-  transition: color 0.2s;
-}
-.clickable:hover .font-semibold {
-  color: #3b82f6;
-  text-decoration: underline;
+.text-right {
+  text-align: right;
 }
 </style>

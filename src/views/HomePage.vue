@@ -11,49 +11,97 @@
     </section>
 
     <div class="main-content-area container">
-      <div class="stats-grid">
-        <StatCard 
-          v-for="stat in stats" 
-          :key="stat.title"
-          :title="stat.title"
-          :value="stat.value"
-          :change="stat.change"
-          :changeType="stat.changeType"
-          :icon="stat.icon"
-          :color="stat.color"
-        />
-      </div>
-
-      <div class="lists-grid">
-        <LatestBlocks :blocks="blocks" @navigate-to-blocks="$emit('navigate', 'BlocksPage')" />
-        <LatestTransactions 
-          :transactions="transactions" 
-          @navigate-to-transactions="$emit('navigate', 'TransactionsPage')"
-          @navigate-to-address="$emit('navigate', 'AddressDetailsPage')" 
-        />
+      <div v-if="loading" class="loading-message">Loading Blockchain Data...</div>
+      <div v-else>
+        <div class="stats-grid">
+          <StatCard
+            v-for="stat in stats"
+            :key="stat.title"
+            :title="stat.title"
+            :value="stat.value"
+            :change="stat.change"
+            :changeType="stat.changeType"
+            :icon="getIconForStat(stat.title)"
+            :color="stat.color"
+          />
+        </div>
+        <div class="lists-grid">
+          <LatestBlocks :blocks="latestBlocks" @navigate="(page, params) => $emit('navigate', page, params)" />
+          <LatestTransactions :transactions="latestTransactions" @navigate="(page, params) => $emit('navigate', page, params)" />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, computed } from 'vue';
+import { apiState } from '../store.js';
 import StatCard from '../components/StatCard.vue';
 import LatestBlocks from '../components/LatestBlocks.vue';
 import LatestTransactions from '../components/LatestTransactions.vue';
 import SearchBar from '../components/SearchBar.vue';
-import { dashboardStats, latestBlocks, latestTransactions } from '../data/mockData.js';
+import { Monitor, Zap, ArrowLeftRight, Users } from 'lucide-vue-next';
+
+const loading = ref(true);
+const allBlocks = ref([]);
+const allTransactions = ref([]);
 
 defineEmits(['navigate']);
 
-const stats = dashboardStats;
-const blocks = latestBlocks;
-const transactions = latestTransactions;
+const stats = computed(() => [
+  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "+1 block/15s", changeType: "increase", color: "blue" },
+  { title: "Total Transactions", value: allTransactions.value.length.toLocaleString(), change: "+150 TPS", changeType: "increase", color: "purple" },
+  { title: "Network Hashrate", value: "N/A", change: "+2.3% today", changeType: "increase", color: "green" },
+  { title: "Active Addresses", value: "N/A", change: "+5.7% week", changeType: "increase", color: "orange" }
+]);
+
+const latestBlocks = computed(() => allBlocks.value.slice(0, 5));
+const latestTransactions = computed(() => allTransactions.value.slice(0, 5));
+
+const getIconForStat = (title) => {
+  const map = {
+    "Current Block": Monitor, "Total Transactions": ArrowLeftRight,
+    "Network Hashrate": Zap, "Active Addresses": Users
+  };
+  return map[title] || Monitor;
+};
+
+onMounted(async () => {
+  loading.value = true;
+  apiState.isConnecting = true;
+  try {
+    const [blocksRes, txsRes] = await Promise.all([
+      fetch(`${apiState.baseUrl}/api/blocks`),
+      fetch(`${apiState.baseUrl}/api/transactions`) 
+    ]);
+
+    if (blocksRes.ok) {
+      allBlocks.value = await blocksRes.json();
+    }
+    if (txsRes.ok) {
+        allTransactions.value = await txsRes.json();
+    }
+    if (blocksRes.ok && txsRes.ok) {
+        apiState.isConnected = true;
+    } else {
+        apiState.isConnected = false;
+    }
+
+  } catch (error) {
+    console.error("Connexion error:", error);
+    apiState.isConnected = false;
+  } finally {
+    loading.value = false;
+    apiState.isConnecting = false;
+  }
+});
 </script>
 
 <style scoped>
 .hero-section {
-  padding: 4rem 0 6rem 0;
-  background: linear-gradient(100deg, #4f46e5, #8b5cf6);
+  padding: 4rem 0;
+  background: transparent;
   color: white;
   text-align: center;
 }
@@ -71,20 +119,27 @@ const transactions = latestTransactions;
   max-width: 600px;
   margin: 0 auto;
 }
-.search-bar-wrapper :deep(.search-input) {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: white;
-}
-.search-bar-wrapper :deep(.search-input::placeholder) {
-  color: #c7d2fe;
-}
-.search-bar-wrapper :deep(.search-button) {
-  background-color: white;
-  color: #4f46e5;
-}
-
 .main-content-area {
-  margin-top: -4rem; 
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+.loading-message {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.25rem;
+  color: #e0e7ff;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+.lists-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
 }
 </style>

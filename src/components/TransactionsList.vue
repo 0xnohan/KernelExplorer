@@ -7,69 +7,71 @@
       </div>
     </div>
 
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Transaction Hash</th>
-            <th>From → To</th>
-            <th>Value</th>
-            <th>Fee</th>
-            <th>Status</th>
-            <th>Block</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="tx in transactions" :key="tx.hash">
-            <td>
-              <span class="font-mono text-blue">{{ tx.hash }}</span>
-            </td>
-            <td>
-              <div class="address-group">
-                <span> <span class="font-mono">{{ tx.from }}</span>→ <span class="font-mono">{{ tx.to }}</span></span>
-              </div>
-            </td>
-            <td>
-              <span class="font-semibold">{{ tx.amount }} KNL</span>
-            </td>
-            <td>
-              <span>{{ tx.fee.toFixed(6) }}</span>
-            </td>
-            <td>
-              <span class="status-badge" :class="tx.status === 'success' ? 'status-success' : 'status-failed'">
-                <CheckCircle v-if="tx.status === 'success'" :size="14" />
-                <XCircle v-else :size="14" />
-                {{ tx.status }}
-              </span>
-            </td>
-            <td>
-              <span class="text-blue">#{{ tx.block_number.toLocaleString() }}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="list-container">
+      <div class="list-header">
+        <span>Txn Hash</span>
+        <span>Block</span>
+        <span>From</span>
+        <span>To</span>
+        <span class="text-right">Value</span>
+      </div>
+
+      <div class="list-body">
+        <div v-for="tx in transactions" :key="tx.hash" class="list-row">
+          <div class="cell-content">
+            <CheckCircle2 size="16" class="cell-icon status-icon-success" />
+            <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">
+              {{ tx.hash.substring(0, 12) }}...
+            </a>
+          </div>
+
+          <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="cell-content block-height">
+            <Package class="cell-icon" />
+            <span>{{ tx.block_height }}</span>
+          </a>
+
+          <div class="cell-content">
+            <User class="cell-icon" />
+            <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono address-link">
+              {{ tx.from[0].substring(0, 12) }}...
+            </a>
+          </div>
+
+          <div class="cell-content address-to">
+             <ArrowRight size="14" class="cell-icon" />
+             <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.to[0] })" class="font-mono address-link">
+              {{ tx.to[0].substring(0, 12) }}...
+            </a>
+          </div>
+
+          <div class="text-right">
+            <span class="value-badge">
+              {{ tx.value }} KNL
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { Activity, CheckCircle, XCircle } from 'lucide-vue-next';
+import { Activity, Package, User, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
 
 defineProps({
   transactions: Array
 });
+
+defineEmits(['navigate']);
+
 </script>
 
 <style scoped>
 .card {
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05);
-  color: #111827;
+  overflow: hidden;
 }
 .card-header {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 .title-container {
   display: flex;
@@ -78,67 +80,83 @@ defineProps({
   font-size: 1.25rem;
   font-weight: 600;
 }
-.title-icon {
-  width: 24px;
-  height: 24px;
+.list-container {
+  padding: 0 1.5rem 1.5rem;
 }
-.table-container {
-  overflow-x: auto;
+.list-header, .list-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr 1fr;
+  gap: 1rem;
+  align-items: center;
 }
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-th {
-  padding: 0.75rem 1.5rem;
-  text-align: left;
+.list-header {
+  padding: 1rem 0;
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   font-weight: 500;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-td {
-  padding: 1rem 1.5rem;
-  font-size: 0.875rem;
-  color: #374151;
-  border-bottom: 1px solid #e5e7eb;
-}
-tbody tr:last-child td {
-  border-bottom: none;
-}
-tbody tr:hover {
-  background-color: #f9fafb;
-}
-
-.font-semibold { font-weight: 600; }
-.font-mono { 
-  font-family: monospace;
-  font-size: 0.8rem;
-}
-.text-blue { color: #3b82f6; }
-
-.address-group {
+.list-body {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+}
+.list-row {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+.list-row:last-child {
+  border-bottom: none;
+}
+.cell-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-text-secondary);
+}
+.cell-icon {
+  width: 16px;
+  height: 16px;
+  color: #a5b4fc;
+  flex-shrink: 0;
+}
+.status-icon-success {
+  color: #6ee7b7;
+}
+.font-mono {
+  font-family: monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+a {
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.hash-link, .block-height, .address-link {
+  color: var(--color-text-primary);
+}
+.hash-link:hover, .block-height:hover, .address-link:hover {
+  color: var(--color-blue);
+  text-decoration: underline;
 }
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
+.address-to {
   gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 9999px;
+}
+.address-to .cell-icon {
+    color: var(--color-text-secondary);
+}
+
+.value-badge {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
   font-weight: 500;
-  font-size: 0.75rem;
 }
-.status-success {
-  background-color: #f0fdf4;
-  color: #16a34a;
-}
-.status-failed {
-  background-color: #fef2f2;
-  color: #ef4444;
+.text-right {
+  text-align: right;
 }
 </style>

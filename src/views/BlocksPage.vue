@@ -1,21 +1,53 @@
 <template>
   <div class="container">
-    <BlocksList :blocks="blocks" @navigate="$emit('navigate', $event)" />
+    <div v-if="loading" class="loading-message">Loading Blocks...</div>
+    <BlocksList v-else :blocks="blocks" @navigate="forwardNavigation" />
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import BlocksList from '../components/BlocksList.vue';
-import { latestBlocks } from '../data/mockData.js';
+import { apiState } from '../store.js'; 
 
+const loading = ref(true);
+const blocks = ref([]);
 
-defineEmits(['navigate']);
+const emit = defineEmits(['navigate']);
+const forwardNavigation = (pageName, props) => {
+  emit('navigate', pageName, props);
+};
 
-const blocks = latestBlocks;
+onMounted(async () => {
+  loading.value = true;
+  apiState.isConnecting = true;
+  try {
+    const response = await fetch(`${apiState.baseUrl}/api/blocks`);
+    if(response.ok) {
+        blocks.value = await response.json();
+        apiState.isConnected = true;
+    } else {
+        apiState.isConnected = false;
+    }
+  } catch (error) {
+    console.error("Failed to fetch blocks:", error);
+    apiState.isConnected = false;
+  } finally {
+    loading.value = false;
+    apiState.isConnecting = false;
+  }
+});
 </script>
 
 <style scoped>
 .container {
-  padding: 2rem;
+  padding: 2rem 2.5rem;
+}
+
+.loading-message {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.25rem;
+  color: var(--color-text-secondary);
 }
 </style>

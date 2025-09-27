@@ -1,37 +1,28 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <div class="title-container">
-        <LayoutGrid class="title-icon" />
-        <h3>Recent Blocks</h3>
-      </div>
-      <button class="view-all-button" @click="goToBlocksPage">
-        <span>View All</span>
-        <ExternalLink :size="16" />
-      </button>
+      <LayoutGrid />
+      <h3>Recent Blocks</h3>
+      <a href="#" @click.prevent="$emit('navigate', 'BlocksPage')" class="view-all-button">
+        View All
+        <ExternalLink :size="14" />
+      </a>
     </div>
 
     <div class="blocks-list">
-      <div v-for="block in blocks" :key="block.height" class="block-item">
+      <div v-for="block in blocks" :key="block.height" class="block-item" @click="$emit('navigate', 'BlockDetailsPage', { blockHash: block.hash })">
         <div class="icon-wrapper">
           <Package :size="20" />
         </div>
         <div class="block-info">
-          <p class="block-number">Block {{ block.height.toLocaleString() }}</p>
+          <p class="block-number">{{ block.height.toLocaleString() }}</p>
           <div class="block-details">
-            <span class="detail-item">
-              <Clock :size="14" /> {{ formatTimestamp(block.timestamp) }}
-            </span>
-            <span class="detail-item">
-              <ArrowLeftRight :size="14" /> {{ block.txns }} txns
-            </span>
-            <span class="detail-item">
-              <User :size="14" /> {{ block.miner }}
-            </span>
+            <span>Transactions: {{ block.transaction_count }}</span>
+            <span class="block-hash-text">Hash: {{ block.hash.substring(0, 35)}}...</span>
           </div>
         </div>
-        <div class="block-reward">
-          <span>{{ block.reward }} KNL</span>
+        <div class="block-timestamp">
+          <span>{{ formatTimestampAgo(block.timestamp) }}</span>
         </div>
       </div>
     </div>
@@ -39,89 +30,77 @@
 </template>
 
 <script setup>
-import { LayoutGrid, ExternalLink, Package, Clock, ArrowLeftRight, User } from 'lucide-vue-next';
+import { LayoutGrid, Package, ExternalLink } from 'lucide-vue-next';
 
 defineProps({
   blocks: Array
 });
 
-const emit = defineEmits(['navigate-to-blocks']);
+defineEmits(['navigate']);
 
-const goToBlocksPage = () => {
-  emit('navigate-to-blocks');
-};
+const formatTimestampAgo = (isoString) => {
+  const now = new Date();
+  const past = new Date(isoString);
+  const seconds = Math.floor((now - past) / 1000);
 
-const formatTimestamp = (isoString) => {
-  const date = new Date(isoString);
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  if (seconds < 2) return `just now`;
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 };
 </script>
 
 <style scoped>
 .card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.title-container {
-  display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.title-icon {
-  width: 20px;
-  height: 20px;
+  padding: 1rem 1.5rem;
 }
 
 .view-all-button {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
+  gap: 0.25rem;
   font-size: 0.875rem;
+  color: var(--color-blue);
+  text-decoration: none;
   font-weight: 500;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s;
+  transition: opacity 0.2s;
 }
+
 .view-all-button:hover {
-  background-color: #f9fafb;
-  color: #111827;
+  opacity: 0.8;
 }
 
 .blocks-list {
-  padding: 1.5rem;
+  padding: 0.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
 }
-
 .block-item {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  transition: box-shadow 0.2s;
+  border-radius: 0.75rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  transition: background-color 0.2s;
+  cursor: pointer; 
 }
 .block-item:hover {
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .icon-wrapper {
-  background-color: #eff6ff;
-  color: #3b82f6;
+  background-color: rgba(129, 140, 248, 0.1);
+  color: #a5b4fc;
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -133,34 +112,33 @@ const formatTimestamp = (isoString) => {
 
 .block-info {
   flex-grow: 1;
+  min-width: 0;
 }
-
 .block-number {
   font-weight: 600;
-  color: #111827;
-  margin: 0 0 0.25rem 0;
+  color: var(--color-text-primary);
+  margin: 0 0 0.5rem 0;
 }
 
 .block-details {
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+.block-hash-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
-.block-reward {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-weight: 500;
+.block-timestamp {
+  margin-left: auto;
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
 }
 </style>

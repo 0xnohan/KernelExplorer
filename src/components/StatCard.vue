@@ -50,12 +50,12 @@ defineProps({
 }
 .title {
   font-size: 0.875rem;
-  color: var(--color-text-muted-dark);
+  color: #e0e7ff;
 }
 .value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--color-text-dark);
+  color: #ffffff; 
 }
 .change {
   display: flex;
@@ -69,12 +69,13 @@ defineProps({
   height: 14px;
 }
 
-.bg-blue-light { background-color: #eff6ff; }
-.text-blue { color: #2563eb; }
-.bg-purple-light { background-color: #f5f3ff; }
-.text-purple { color: #7c3aed; }
-.bg-green-light { background-color: #f0fdf4; }
-.text-green { color: #16a34a; }
-.bg-orange-light { background-color: #fff7ed; }
-.text-orange { color: #f97316; }
+.bg-blue-light { background-color: rgba(129, 140, 248, 0.2); }
+.text-blue { color: #a5b4fc; }
+.bg-purple-light { background-color: rgba(167, 139, 250, 0.2); }
+.text-purple { color: #c4b5fd; }
+.bg-green-light { background-color: rgba(52, 211, 153, 0.2); }
+.text-green { color: #6ee7b7; }
+.bg-orange-light { background-color: rgba(245, 158, 11, 0.2); }
+.text-orange { color: #fcd34d; }
+.text-red { color: #f87171; } 
 </style>
