@@ -34,7 +34,7 @@
           <div class="cell-content">
             <User class="cell-icon" />
             <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: block.miner })" class="font-mono miner-link">
-              {{ block.miner }}
+              {{ truncateHash(block.miner) }}
             </a>
           </div>
           <div class="cell-content">
@@ -65,6 +65,10 @@ const formatTimestamp = (isoString) => {
   const date = new Date(isoString);
   const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
   return new Intl.DateTimeFormat('en-US', options).format(date);
+};
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
 };
 </script>
 

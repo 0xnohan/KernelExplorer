@@ -14,15 +14,15 @@
         <div class="info-grid">
           <div class="detail-row">
             <span class="label"><Hash class="icon" />Block Hash</span>
-            <span class="value font-mono">{{ block.hash }}</span>
+            <span class="value font-mono">{{block.hash}}</span>
           </div>
           <div class="detail-row">
             <span class="label"><ArrowLeft class="icon" />Previous Hash</span>
-             <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: block.previous_hash })" class="value font-mono hash-link">{{ block.previous_hash }}</a>
+             <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: block.previous_hash })" class="value font-mono hash-link">{{ truncateHash(block.previous_hash) }}</a>
           </div>
           <div class="detail-row">
             <span class="label"><FileBox class="icon" />Merkle Root</span>
-            <span class="value">{{ block.merkle_root }}</span>
+            <span class="value">{{block.merkle_root }}</span>
           </div>
           <div class="detail-row">
             <span class="label"><FileBox class="icon" />Nonce</span>
@@ -62,19 +62,22 @@
             <span>Txn Hash</span>
             <span>From</span>
             <span>To</span>
-            <span class="text-right">Value</span>
+            <span class="text-right">Amount</span>
           </div>
           <div class="list-body">
             <div v-for="tx in block.transactions" :key="tx.hash" class="list-row">
               <div class="txn-hash-cell">
                 <CheckCircle2 size="18" class="status-icon-success" />
-                <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</a>
+                <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{truncateHash(tx.hash)}}</a>
               </div>
               
               <span v-if="tx.inputs[0].address === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
-              <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.inputs[0].address })" class="font-mono hash-link">{{ tx.inputs[0].address.substring(0, 15) }}...</a>
-
-              <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.outputs[0].address })" class="font-mono hash-link">{{ tx.outputs[0].address.substring(0, 15) }}...</a>
+              <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.inputs[0].address })" class="font-mono hash-link">{{truncateHash(tx.inputs[0].address) }}</a>
+            
+              <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.outputs[0].address })" class="font-mono hash-link">
+                <ArrowRight size="14" />
+                {{truncateHash(tx.outputs[0].address)}}
+              </a>
               
               <span class="text-right">{{ tx.outputs[0].amount }} KNL</span>
             </div>
@@ -89,7 +92,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
-import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2 } from 'lucide-vue-next';
+import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2, ArrowRight } from 'lucide-vue-next';
 
 const props = defineProps({
   blockHash: { type: String, required: true }
@@ -111,6 +114,10 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
+};
 </script>
 
 <style scoped>

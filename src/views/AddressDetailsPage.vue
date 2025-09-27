@@ -45,23 +45,23 @@
               <span>Block</span>
               <span>From</span>
               <span>To</span>
-              <span class="text-right">Value</span>
+              <span class="text-right">Amount</span>
             </div>
             <div class="list-body">
               <div v-for="tx in addressDetails.transactions" :key="tx.hash" class="list-row">
                 <div class="txn-hash-cell">
                   <CheckCircle2 size="18" class="status-icon-success" />
-                  <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</a>
+                  <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{ truncateHash(tx.hash) }}</a>
                 </div>
                 
                 <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="font-mono hash-link">{{ tx.block_height }}</a>
 
                 <span v-if="tx.from[0] === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
-                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ tx.from[0].substring(0, 15) }}...</a>
+                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ truncateHash(tx.from[0]) }}</a>
 
                 <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: findMainRecipient(tx.to, tx.from, true) })" class="font-mono hash-link address-to">
                   <ArrowRight size="14" />
-                  {{ findMainRecipient(tx.to, tx.from) }}...
+                  {{ findMainRecipient(tx.to, tx.from) }}
                 </a>
                 
                 <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
@@ -96,7 +96,7 @@ const addressDetails = ref(null);
 const findMainRecipient = (outputs, inputs, fullAddress = false) => {
   const recipientOutput = outputs.find(out => !inputs.includes(out.address));
   const address = recipientOutput ? recipientOutput.address : (outputs[0] ? outputs[0].address : '');
-  return fullAddress ? address : address.substring(0, 12);
+  return fullAddress ? address : truncateHash(address);
 };
 
 const fetchAddressData = async (hash) => {
@@ -122,6 +122,11 @@ onMounted(() => {
 watch(() => props.addressHash, (newHash) => {
     fetchAddressData(newHash);
 });
+
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
+};
 </script>
 
 <style scoped>

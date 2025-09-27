@@ -15,9 +15,9 @@
           <CheckCircle2 :size="20" class="status-icon-success" />
         </div>
         <div class="tx-info">
-          <p class="tx-hash">{{ tx.hash.substring(0, 18) }}...</p>
+          <p class="tx-hash">{{ truncateHash(tx.hash)}}</p>
           <div class="tx-details">
-            <span class="font-mono">{{ tx.from[0].substring(0, 8) }}... &rarr; {{ tx.to[0].substring(0, 8) }}...</span>
+            <span class="font-mono">{{ truncateHash(tx.from[0]) }} &rarr; {{ truncateHash(tx.to[0]) }}</span>
           </div>
         </div>
         <div class="tx-value">
@@ -40,6 +40,11 @@ defineProps({
 });
 
 defineEmits(['navigate']);
+
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
+};
 </script>
 
 <style scoped>
