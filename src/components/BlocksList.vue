@@ -13,7 +13,7 @@
         <span>Timestamp</span>
         <span>Transactions</span>
         <span>Miner</span>
-        <span>Gas Used</span>
+        <span>Capacity</span>
         <span class="text-right">Reward</span>
       </div>
 

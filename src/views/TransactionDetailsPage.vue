@@ -40,7 +40,7 @@
                     <User class="io-icon" />
                     <div class="address-details">
                         <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: input.address })" class="font-mono hash-link">{{ input.address === 'Coinbase' ? 'Coinbase' : input.address }}</a>
-                        <span v-if="input.value !== null" class="io-value">{{ input.value }} KNL</span>
+                        <span v-if="input.value !== null" class="io-value">{{ input.value.toFixed(8) }} KNL</span>
                     </div>
                 </div>
             </div>

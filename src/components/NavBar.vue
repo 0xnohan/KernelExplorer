@@ -81,7 +81,6 @@ const toggle = () => {
   height: 100vh;
   color: #f9fafb;
 }
-
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -168,7 +167,8 @@ const toggle = () => {
 }
 
 .sidebar.is-closed .main-nav a {
-  justify-content: center;
+  justify-content: center; 
+  gap: 0; 
 }
 
 .sidebar.is-closed .toggle-button .icon {
