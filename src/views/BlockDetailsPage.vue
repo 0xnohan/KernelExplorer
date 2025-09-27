@@ -1,68 +1,101 @@
 <template>
   <div class="container">
-    <div class="card header-card">
-      <div class="address-info">
-        <QrCode :size="40" class="qr-icon" />
-        <div>
-          <p class="address-label">ADDRESS</p>
-          <h1 class="address-hash">{{ address.address }}</h1>
+    <div v-if="loading" class="loading-message">Loading Block Details...</div>
+    <div v-else-if="block">
+      <h1 class="page-title">Block #{{ block.block_number }}</h1>
+      <div class="card">
+        <div class="detail-item highlighted">
+          <span class="value font-mono">{{ block.hash }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Previous Block Hash</span>
+          <span class="value font-mono text-blue">{{ block.previous_hash }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Confirmations</span>
+          <span class="value">{{ block.confirmations }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Transactions</span>
+          <span class="value">{{ block.transaction_count }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Size</span>
+          <span class="value">{{ block.size.toLocaleString() }} bytes</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Merkle Root</span>
+          <span class="value font-mono">{{ block.merkle_root }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Nonce</span>
+          <span class="value font-mono">{{ block.nonce }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Timestamp</span>
+          <span class="value">{{ new Date(block.timestamp).toLocaleString() }}</span>
         </div>
       </div>
-      <div class="balance-info">
-        <p class="balance-label">AVAILABLE BALANCE</p>
-        <h1 class="balance-amount">{{ address.balance }} KNL</h1>
-      </div>
-    </div>
 
-    <div class="stats-grid">
-      <div class="card stat-card">
-        <p class="stat-label">UNSPENT TRANSACTIONS</p>
-        <p class="stat-value">{{ address.unspent_tx_count }}</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL TRANSACTIONS</p>
-        <p class="stat-value">{{ address.total_tx_count }}</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL RECEIVED</p>
-        <p class="stat-value">{{ address.total_received }} KNL</p>
-      </div>
-      <div class="card stat-card">
-        <p class="stat-label">TOTAL SENT</p>
-        <p class="stat-value">{{ address.total_sent }} KNL</p>
-      </div>
-    </div>
-
-    <h2 class="section-title">Unspent Outputs (UTXOs)</h2>
-    <div class="transactions-container">
-      <div v-for="tx in address.utxos" :key="tx.hash" class="card transaction-card">
-        <p class="tx-hash font-mono">{{ tx.hash }}</p>
-        <div class="io-grid">
-          <div>
-            <h4 class="io-title">INPUTS</h4>
-            <div v-for="(input, index) in tx.inputs" :key="index" class="io-item">
-              <span class="io-index">#{{ index }}</span>
-              <span class="font-mono coinbase">{{ input.address }}</span>
+      <h2 class="section-title">Transactions</h2>
+      <div class="transactions-container">
+        <div v-for="tx in block.transactions" :key="tx.hash" class="card transaction-card">
+          <p class="tx-hash font-mono">{{ tx.hash }}</p>
+          <div class="io-grid">
+            <div>
+              <h4 class="io-title">INPUTS</h4>
+              <div v-for="(input, index) in tx.inputs" :key="index" class="io-item">
+                <span class="io-index">#{{ index }}</span>
+                <span class="font-mono" :class="{ 'coinbase': input.address.includes('Coinbase') }">
+                  {{ input.address }}
+                </span>
+              </div>
             </div>
-          </div>
-          <div>
-            <h4 class="io-title">OUTPUTS</h4>
-            <div v-for="(output, index) in tx.outputs" :key="index" class="io-item">
-              <span class="io-index">#{{ index }}</span>
-              <span class="font-mono text-blue">{{ output.address }}</span>
-              <span class="amount-badge">{{ output.amount }} KNL</span>
+            <div>
+              <h4 class="io-title">OUTPUTS</h4>
+              <div v-for="(output, index) in tx.outputs" :key="index" class="io-item">
+                <span class="io-index">#{{ index }}</span>
+                <span class="font-mono text-blue">{{ output.address }}</span>
+                <span class="amount-badge">{{ output.amount }} KNL</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <div v-else class="loading-message">Block not found.</div>
   </div>
 </template>
-
 <script setup>
-import { QrCode } from 'lucide-vue-next';
-import { mockAddressDetails } from '../data/mockData.js';
-const address = mockAddressDetails;
+import { ref, onMounted } from 'vue';
+import { apiState } from '../store.js'; // Importer l'état
+
+const props = defineProps({
+  blockHash: { type: String, required: true }
+});
+
+const loading = ref(true);
+const block = ref(null);
+
+onMounted(async () => {
+  if (!props.blockHash) return;
+  apiState.isConnecting = true;
+  try {
+    const response = await fetch(`${apiState.baseUrl}/api/block/${props.blockHash}`); // Utilise l'URL du store
+    if (response.ok) {
+      block.value = await response.json();
+      apiState.isConnected = true;
+    } else {
+      apiState.isConnected = false;
+    }
+  } catch (error) {
+    console.error(`Impossible de récupérer les détails du bloc ${props.blockHash}:`, error);
+    apiState.isConnected = false;
+  } finally {
+    loading.value = false;
+    apiState.isConnecting = false;
+  }
+});
 </script>
 
 <style scoped>

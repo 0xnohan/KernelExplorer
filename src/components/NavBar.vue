@@ -30,17 +30,32 @@
         </a>
       </nav>
     </div>
+    
+    <div class="connection-card-wrapper">
+      <div class="card connection-card" :class="{ 'is-closed': !isOpen }">
+        <div class="status-indicator" :class="apiState.isConnected ? 'connected' : 'disconnected'"></div>
+        <div class="status-text">
+          <p class="status-title">{{ apiState.isConnected ? 'Connected' : 'Disconnected' }}</p>
+          <p class="status-url">{{ apiState.baseUrl }}</p>
+        </div>
+        <button class="connect-button" @click="$emit('open-connect-modal')">
+          <Plug :size="16" />
+        </button>
+      </div>
+    </div>
   </aside>
 </template>
 
 <script setup>
-import { Home, Package, ArrowLeftRight, Hourglass, ChevronsLeft } from 'lucide-vue-next';
+import { Plug, Home, Package, ArrowLeftRight, Hourglass, ChevronsLeft } from 'lucide-vue-next';
+import { apiState } from '../store.js';
 
 defineProps({
   isOpen: Boolean
 });
 
-const emit = defineEmits(['navigate', 'toggle-sidebar']);
+const emit = defineEmits(['navigate', 'toggle-sidebar', 'open-connect-modal']);
+
 const navigate = (pageName) => {
   emit('navigate', pageName);
 };
@@ -52,7 +67,7 @@ const toggle = () => {
 
 <style scoped>
 .sidebar {
-  background-color: var(--color-bg-secondary); 
+  background-color: var(--color-bg-secondary);
   border-right: 1px solid #374151;
   display: flex;
   flex-direction: column;
@@ -158,5 +173,75 @@ const toggle = () => {
 
 .sidebar.is-closed .toggle-button .icon { 
   transform: rotate(180deg); 
+}
+
+/* Styles pour la carte de connexion */
+.connection-card-wrapper {
+  margin-top: auto;
+}
+.connection-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #1f2937;
+  transition: all 0.3s;
+  border-radius: 8px;
+  border-color: var(--color-border);
+  margin-bottom: 50px;
+}
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-indicator.connected { background-color: #22c55e; }
+.status-indicator.disconnected { background-color: #ef4444; }
+
+.status-text {
+  flex-grow: 1;
+  min-width: 0;
+  opacity: 1;
+  transition: opacity 0.2s, width 0.3s;
+}
+.status-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.status-url {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.connect-button {
+  background: none;
+  border: 1px solid #4b5563;
+  color: #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  display: flex;
+}
+
+/* --- NOUVEAUX STYLES POUR LE MODE FERMÉ --- */
+.connection-card.is-closed {
+  justify-content: center;
+  background-color: transparent; /* Rend le fond de la carte transparent */
+  padding: 0; /* Supprime le padding */
+}
+.connection-card.is-closed .status-indicator,
+.connection-card.is-closed .status-text {
+  display: none; /* Cache l'indicateur et le texte */
+}
+.connection-card.is-closed .connect-button {
+  border: none; /* Supprime la bordure du bouton */
+  background-color: #1f2937; /* Donne un fond au bouton seul */
+  padding: 0.75rem; /* Augmente légèrement la taille du bouton */
+}
+.connection-card.is-closed .connect-button:hover {
+  background-color: #374151;
 }
 </style>

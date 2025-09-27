@@ -22,9 +22,8 @@
         <tbody>
           <tr v-for="block in blocks" :key="block.height">
             <td>
-              <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage')" class="cell-content clickable">
-                <Package class="cell-icon text-blue" />
-                <span class="font-semibold">#{{ block.height.toLocaleString() }}</span>
+              <a href="#" @click.prevent="$emit('navigate', { blockHash: block.hash })">
+                #{{ block.height }}
               </a>
             </td>
             <td>
@@ -36,7 +35,7 @@
             <td>
               <div class="cell-content">
                 <ArrowLeftRight class="cell-icon" />
-                <span>{{ block.txns }}</span>
+                <span>{{ block.transaction_count }}</span>
               </div>
             </td>
             <td>
@@ -48,7 +47,7 @@
             <td>
               <div class="cell-content">
                 <Zap class="cell-icon text-yellow" />
-                <span>{{ ((block.block_size / block.block_limit) * 100).toFixed(1) }}%</span>
+                <span>{{ block.size_used}}%</span>
               </div>
             </td>
             <td>
