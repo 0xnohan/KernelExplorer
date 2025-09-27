@@ -19,7 +19,7 @@
 
       <div class="list-body">
         <div v-for="block in blocks" :key="block.height" class="list-row">
-          <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: block.hash })" class="cell-content block-height">
+          <a href="#" @click.prevent="$emit('navigate', { blockHash: block.hash })" class="cell-content block-height">
             <Package class="cell-icon" />
             <span>{{ block.height }}</span>
           </a>
@@ -33,9 +33,7 @@
           </div>
           <div class="cell-content">
             <User class="cell-icon" />
-            <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { address: block.miner })" class="font-mono miner-link">
-              {{ block.miner }}
-            </a>
+            <span class="font-mono">{{ block.miner }}</span>
           </div>
           <div class="cell-content">
             <Zap class="cell-icon text-yellow" />
@@ -157,17 +155,6 @@ const formatTimestamp = (isoString) => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 150px; /* Empêche les adresses trop longues de casser le layout */
-}
-
-/* NOUVEAU STYLE POUR LE LIEN DU MINEUR */
-.miner-link {
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-.miner-link:hover {
-  color: var(--color-blue);
-  text-decoration: underline;
 }
 
 .text-yellow {
