@@ -87,7 +87,6 @@
 </template>
 
 <script setup>
-// Le script reste le même
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
 import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2 } from 'lucide-vue-next';
@@ -115,9 +114,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Ajout du style pour "Coinbase" */
 .coinbase-text {
-    color: #fcd34d; /* Jaune */
+    color: #fcd34d; 
     font-weight: 600;
 }
 a.hash-link {
@@ -128,7 +126,6 @@ a.hash-link {
 a.hash-link:hover {
     text-decoration: underline;
 }
-/* Le reste du CSS reste le même */
 .container {
   padding: 2rem 2.5rem;
 }
