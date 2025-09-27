@@ -21,6 +21,18 @@
             <span class="value font-mono hash-link">{{ block.previous_hash }}</span>
           </div>
           <div class="detail-row">
+            <span class="label"><FileBox class="icon" />Merkle Root</span>
+            <span class="value">{{ block.merkle_root }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><FileBox class="icon" />Nonce</span>
+            <span class="value">{{ block.nonce }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><Zap class="icon" />Block Size / Block Limit</span>
+            <span class="value">{{ block.size }} bytes / 1 000 000 bytes ({{ ((block.size / 1000000) * 100).toFixed(2) }}%)</span>
+          </div>
+          <div class="detail-row">
             <span class="label"><Clock class="icon" />Timestamp</span>
             <span class="value">{{ new Date(block.timestamp).toLocaleString() }}</span>
           </div>
@@ -31,22 +43,14 @@
             </span>
           </div>
           <div class="detail-row">
-            <span class="label"><User class="icon" />Miner</span>
-            <span class="value font-mono">{{ block.miner }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label"><Zap class="icon" />Block Size / Block Limit</span>
-            <span class="value">{{ block.size }} bytes / 1 000 000 bytes ({{ ((block.size / 1000000) * 100).toFixed(2) }}%)</span>
-          </div>
-          <div class="detail-row">
             <span class="label"><Gift class="icon" />Block Reward</span>
             <span class="value">
               <span class="reward-badge">{{ block.reward }} KNL</span>
             </span>
           </div>
           <div class="detail-row">
-            <span class="label"><FileBox class="icon" />Merkle Root</span>
-            <span class="value">{{ block.merkle_root }}</span>
+            <span class="label"><User class="icon" />Miner</span>
+            <span class="value font-mono">{{ block.miner }}</span>
           </div>
         </div>
       </div>
