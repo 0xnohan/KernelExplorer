@@ -67,10 +67,10 @@ const toggle = () => {
 
 <style scoped>
 .sidebar {
-  background: rgba(30, 27, 75, 0.5);
+  background: var(--color-glass-bg);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;

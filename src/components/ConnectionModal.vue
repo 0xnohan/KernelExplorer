@@ -46,7 +46,7 @@ const handleSave = () => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(10, 5, 40, 0.5); 
+  background-color: rgba(13, 18, 38, 0.5);
   -webkit-backdrop-filter: blur(10px); 
   backdrop-filter: blur(10px);
   display: flex;
