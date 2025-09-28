@@ -46,17 +46,22 @@ import { Monitor, Zap, ArrowLeftRight, Users } from 'lucide-vue-next';
 const loading = ref(true);
 const allBlocks = ref([]);
 const allTransactions = ref([]);
+const networkStats = ref({
+  total_transactions: 0,
+  active_addresses: 0,
+  network_hashrate: "N/A"
+});
 
 defineEmits(['navigate']);
 
 const stats = computed(() => [
-  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "+1 block/15s", changeType: "increase", color: "blue" },
-  { title: "Total Transactions", value: allTransactions.value.length.toLocaleString(), change: "+150 TPS", changeType: "increase", color: "purple" },
-  { title: "Network Hashrate", value: "N/A", change: "+2.3% today", changeType: "increase", color: "green" },
-  { title: "Active Addresses", value: "N/A", change: "+5.7% week", changeType: "increase", color: "orange" }
+  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "", changeType: "", color: "blue" }, //increase
+  { title: "Total Transactions", value: networkStats.value.total_transactions.toLocaleString(), change: "", changeType: "", color: "purple" },
+  { title: "Network Hashrate", value: networkStats.value.network_hashrate, change: "", changeType: "", color: "green" },
+  { title: "Active Addresses", value: networkStats.value.active_addresses.toLocaleString(), change: "", changeType: "", color: "orange" }
 ]);
 
-const latestBlocks = computed(() => allBlocks.value.slice(0, 5));
+const latestBlocks = computed(() => allBlocks.value.slice(0, 4));
 const latestTransactions = computed(() => allTransactions.value.slice(0, 5));
 
 const getIconForStat = (title) => {
@@ -71,18 +76,17 @@ onMounted(async () => {
   loading.value = true;
   apiState.isConnecting = true;
   try {
-    const [blocksRes, txsRes] = await Promise.all([
+    const [blocksRes, txsRes, statsRes] = await Promise.all([
       fetch(`${apiState.baseUrl}/api/blocks`),
-      fetch(`${apiState.baseUrl}/api/transactions`) 
+      fetch(`${apiState.baseUrl}/api/transactions`),
+      fetch(`${apiState.baseUrl}/api/stats`) 
     ]);
 
-    if (blocksRes.ok) {
-      allBlocks.value = await blocksRes.json();
-    }
-    if (txsRes.ok) {
-        allTransactions.value = await txsRes.json();
-    }
-    if (blocksRes.ok && txsRes.ok) {
+    if (blocksRes.ok) allBlocks.value = await blocksRes.json();
+    if (txsRes.ok) allTransactions.value = await txsRes.json();
+    if (statsRes.ok) networkStats.value = await statsRes.json();
+
+    if (blocksRes.ok && txsRes.ok && statsRes.ok) {
         apiState.isConnected = true;
     } else {
         apiState.isConnected = false;

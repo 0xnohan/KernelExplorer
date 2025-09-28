@@ -67,10 +67,10 @@ const toggle = () => {
 
 <style scoped>
 .sidebar {
-  background: rgba(30, 27, 75, 0.5);
+  background: var(--color-glass-bg);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -81,7 +81,6 @@ const toggle = () => {
   height: 100vh;
   color: #f9fafb;
 }
-
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -168,7 +167,8 @@ const toggle = () => {
 }
 
 .sidebar.is-closed .main-nav a {
-  justify-content: center;
+  justify-content: center; 
+  gap: 0; 
 }
 
 .sidebar.is-closed .toggle-button .icon {

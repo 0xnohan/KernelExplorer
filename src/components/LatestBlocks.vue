@@ -18,7 +18,7 @@
           <p class="block-number">{{ block.height.toLocaleString() }}</p>
           <div class="block-details">
             <span>Transactions: {{ block.transaction_count }}</span>
-            <span class="block-hash-text">Hash: {{ block.hash.substring(0, 35)}}...</span>
+            <span class="block-hash-text">Hash: {{ truncateHash(block.hash)}}</span>
           </div>
         </div>
         <div class="block-timestamp">
@@ -51,6 +51,10 @@ const formatTimestampAgo = (isoString) => {
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   return `${days}d ago`;
+};
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
 };
 </script>
 

@@ -13,7 +13,7 @@
         <span>Block</span>
         <span>From</span>
         <span>To</span>
-        <span class="text-right">Value</span>
+        <span class="text-right">Amount</span>
       </div>
 
       <div class="list-body">
@@ -21,7 +21,7 @@
           <div class="cell-content">
             <CheckCircle2 size="16" class="cell-icon status-icon-success" />
             <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">
-              {{ tx.hash.substring(0, 12) }}...
+              {{ truncateHash(tx.hash) }}
             </a>
           </div>
 
@@ -33,14 +33,14 @@
           <div class="cell-content">
             <User class="cell-icon" />
             <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono address-link">
-              {{ tx.from[0].substring(0, 12) }}...
+              {{ truncateHash(tx.from[0]) }}
             </a>
           </div>
 
           <div class="cell-content address-to">
              <ArrowRight size="14" class="cell-icon" />
              <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.to[0] })" class="font-mono address-link">
-              {{ tx.to[0].substring(0, 12) }}...
+              {{ truncateHash(tx.to[0]) }}
             </a>
           </div>
 
@@ -64,6 +64,10 @@ defineProps({
 
 defineEmits(['navigate']);
 
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
+};
 </script>
 
 <style scoped>

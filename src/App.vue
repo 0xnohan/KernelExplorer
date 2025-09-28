@@ -22,7 +22,6 @@
 </template>
 
 <script setup>
-// Le script reste identique
 import { ref, computed } from 'vue';
 import NavBar from './components/NavBar.vue';
 import ConnectionModal from './components/ConnectionModal.vue';
@@ -75,14 +74,18 @@ const handleNavigation = (pageName, props = {}) => {
   grid-template-columns: 240px 1fr;
   transition: grid-template-columns 0.3s ease-in-out;
   height: 100vh; 
+  width: 100vw;  
+  overflow: hidden;
 }
 
 .dashboard-layout.sidebar-closed {
-  grid-template-columns: 88px 1fr;
+  grid-template-columns: 85px 1fr;
 }
 
 .main-content {
+  flex-grow: 1;
   overflow-y: auto;
   height: 100vh;
 }
+
 </style>

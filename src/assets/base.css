@@ -1,19 +1,21 @@
 :root {
-  --color-bg-primary: #111827;
-  --color-bg-secondary: #1f2937;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #e0e7ff;
-  --color-blue: #818cf8;
-  --color-purple: #a78bfa;
-  --color-green: #34d399;
-  --color-orange: #f59e0b;
+  --color-background: #0d1226;
+  --color-glass-bg: rgba(26, 34, 63, 0.5); 
+  --color-border: rgba(112, 160, 255, 0.2); 
+  
+  --color-text-primary: #e0e7ff;
+  --color-text-secondary: #9ea8c7;
+  
+  --color-blue-accent: #70a0ff;
+  --color-green-accent: #6ee7b7;
+  --color-red-accent: #fca5a5;
 }
 
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  background: linear-gradient(100deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  background: linear-gradient(135deg, #1f2746 0%, #0d1226 100%);
+  background-attachment: fixed; 
   color: var(--color-text-primary);
   min-height: 100vh; 
 }

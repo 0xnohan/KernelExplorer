@@ -14,7 +14,7 @@
         <div class="info-grid">
           <div class="detail-row">
             <span class="label"><MapPin class="icon" />Address</span>
-            <span class="value font-mono hash-link">{{ addressDetails.address }}</span>
+            <span class="value font-mono">{{ addressDetails.address }}</span>
           </div>
           <div class="detail-row">
             <span class="label"><Wallet class="icon" />Balance</span>
@@ -45,23 +45,23 @@
               <span>Block</span>
               <span>From</span>
               <span>To</span>
-              <span class="text-right">Value</span>
+              <span class="text-right">Amount</span>
             </div>
             <div class="list-body">
               <div v-for="tx in addressDetails.transactions" :key="tx.hash" class="list-row">
                 <div class="txn-hash-cell">
                   <CheckCircle2 size="18" class="status-icon-success" />
-                  <span class="font-mono hash-link" @click="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })">{{ tx.hash.substring(0, 15) }}...</span>
+                  <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{ truncateHash(tx.hash) }}</a>
                 </div>
                 
-                <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="hash-link">{{ tx.block_height }}</a>
+                <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="font-mono hash-link">{{ tx.block_height }}</a>
 
                 <span v-if="tx.from[0] === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
-                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ tx.from[0].substring(0, 15) }}...</a>
+                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ truncateHash(tx.from[0]) }}</a>
 
                 <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: findMainRecipient(tx.to, tx.from, true) })" class="font-mono hash-link address-to">
                   <ArrowRight size="14" />
-                  {{ findMainRecipient(tx.to, tx.from) }}...
+                  {{ findMainRecipient(tx.to, tx.from) }}
                 </a>
                 
                 <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
@@ -80,7 +80,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { apiState } from '../store.js';
 import { ArrowLeft, MapPin, Wallet, ArrowLeftRight, DownloadCloud, UploadCloud, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
 
@@ -96,191 +96,72 @@ const addressDetails = ref(null);
 const findMainRecipient = (outputs, inputs, fullAddress = false) => {
   const recipientOutput = outputs.find(out => !inputs.includes(out.address));
   const address = recipientOutput ? recipientOutput.address : (outputs[0] ? outputs[0].address : '');
-  return fullAddress ? address : address.substring(0, 12);
+  return fullAddress ? address : truncateHash(address);
 };
 
-onMounted(async () => {
-  if (!props.addressHash) return;
-  loading.value = true; 
-  try {
-    const response = await fetch(`${apiState.baseUrl}/api/address/${props.addressHash}`); 
-    if (response.ok) {
-      addressDetails.value = await response.json();
+const fetchAddressData = async (hash) => {
+    if (!hash) return;
+    loading.value = true;
+    addressDetails.value = null;
+    try {
+        const response = await fetch(`${apiState.baseUrl}/api/address/${hash}`);
+        if (response.ok) {
+            addressDetails.value = await response.json();
+        }
+    } catch (error) {
+        console.error(`Impossible to fetch address details for ${hash}:`, error);
+    } finally {
+        loading.value = false;
     }
-  } catch (error) {
-    console.error(`Impossible to fetch address details for ${props.addressHash}:`, error);
-  } finally {
-    loading.value = false;
-  }
+};
+
+onMounted(() => {
+    fetchAddressData(props.addressHash);
 });
+
+watch(() => props.addressHash, (newHash) => {
+    fetchAddressData(newHash);
+});
+
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
+};
 </script>
 
 <style scoped>
-.container {
-  padding: 2rem 2.5rem;
-}
-.loading-message {
-  text-align: center;
-  padding: 4rem;
-  font-size: 1.25rem;
-  color: var(--color-text-secondary);
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-.back-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-}
-
-.card {
-  margin-bottom: 2rem;
-}
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.info-grid {
-  display: flex;
-  flex-direction: column;
-}
-
-.detail-row {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 1.5rem;
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.875rem;
-}
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.label {
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-weight: 500;
-}
-.label .icon {
-  width: 16px;
-  height: 16px;
-  color: #a5b4fc;
-}
-.value {
-  color: var(--color-text-primary);
-  font-weight: 500;
-}
-.font-mono {
-  font-family: monospace;
-}
-a.hash-link {
-  color: var(--color-blue);
-  cursor: pointer;
-  text-decoration: none;
-}
-a.hash-link:hover {
-    text-decoration: underline;
-}
-.balance-amount {
-  font-weight: 700;
-  color: #6ee7b7;
-}
-.tx-badge {
-    background-color: rgba(129, 140, 248, 0.2);
-    color: #a5b4fc;
-    padding: 0.35rem 0.75rem;
-    border-radius: 6px;
-}
-
-.no-data-message {
-  padding: 2rem 1.5rem;
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-.list-container {
-  padding: 0 1.5rem 1.5rem;
-}
-.list-header, .list-row {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1.2fr 1.2fr 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-.list-header {
-  padding: 1rem 0;
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  font-weight: 500;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-.list-body {
-  display: flex;
-  flex-direction: column;
-}
-.list-row {
-  padding: 1rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 0.875rem;
-}
-.list-row:last-child {
-  border-bottom: none;
-}
-
-.text-right {
-  text-align: right;
-}
-.address-to {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.value-col {
-  font-weight: 600;
-}
-.text-green {
-  color: #6ee7b7;
-}
-.text-red {
-  color: #fca5a5;
-}
-.txn-hash-cell {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.status-icon-success {
-  color: #6ee7b7;
-}
-
-.coinbase-text {
-    color: #fcd34d; 
-    font-weight: 600;
-}
+.container { padding: 2rem 2.5rem; }
+.loading-message { text-align: center; padding: 4rem; font-size: 1.25rem; color: var(--color-text-secondary); }
+.page-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+.back-button { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s; }
+.back-button:hover { background: rgba(255, 255, 255, 0.2); }
+.page-title { font-size: 2.5rem; font-weight: 800; }
+.card { margin-bottom: 2rem; }
+.card-title { font-size: 1.25rem; font-weight: 600; padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.info-grid { display: flex; flex-direction: column; }
+.detail-row { display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.875rem; }
+.detail-row:last-child { border-bottom: none; }
+.label { color: var(--color-text-secondary); display: flex; align-items: center; gap: 0.75rem; font-weight: 500; }
+.label .icon { width: 16px; height: 16px; color: #a5b4fc; }
+.value { color: var(--color-text-primary); font-weight: 500; }
+.font-mono { font-family: monospace; }
+a.hash-link { color: var(--color-blue); cursor: pointer; text-decoration: none; }
+a.hash-link:hover { text-decoration: underline; }
+.balance-amount { font-weight: 700; color: #6ee7b7; }
+.tx-badge { background-color: rgba(129, 140, 248, 0.2); color: #a5b4fc; padding: 0.35rem 0.75rem; border-radius: 6px; }
+.no-data-message { padding: 2rem 1.5rem; text-align: center; color: var(--color-text-secondary); }
+.list-container { padding: 0 1.5rem 1.5rem; }
+.list-header, .list-row { display: grid; grid-template-columns: 1.5fr 1fr 1.2fr 1.2fr 1fr; gap: 1rem; align-items: center; }
+.list-header { padding: 1rem 0; font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; font-weight: 500; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+.list-body { display: flex; flex-direction: column; }
+.list-row { padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.875rem; }
+.list-row:last-child { border-bottom: none; }
+.text-right { text-align: right; }
+.address-to { display: flex; align-items: center; gap: 0.5rem; }
+.value-col { font-weight: 600; }
+.text-green { color: #6ee7b7; }
+.text-red { color: #fca5a5; }
+.txn-hash-cell { display: flex; align-items: center; gap: 0.75rem; }
+.status-icon-success { color: #6ee7b7; }
+.coinbase-text { color: #fcd34d; font-weight: 600; }
 </style>

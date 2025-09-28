@@ -14,11 +14,23 @@
         <div class="info-grid">
           <div class="detail-row">
             <span class="label"><Hash class="icon" />Block Hash</span>
-            <span class="value font-mono hash-link">{{ block.hash }}</span>
+            <span class="value font-mono">{{block.hash}}</span>
           </div>
           <div class="detail-row">
             <span class="label"><ArrowLeft class="icon" />Previous Hash</span>
-            <span class="value font-mono hash-link">{{ block.previous_hash }}</span>
+             <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: block.previous_hash })" class="value font-mono hash-link">{{ truncateHash(block.previous_hash) }}</a>
+          </div>
+          <div class="detail-row">
+            <span class="label"><FileBox class="icon" />Merkle Root</span>
+            <span class="value">{{block.merkle_root }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><FileBox class="icon" />Nonce</span>
+            <span class="value">{{ block.nonce }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label"><Zap class="icon" />Capacity</span>
+            <span class="value">{{ ((block.size / 1000000) * 100).toFixed(2) }}%</span>
           </div>
           <div class="detail-row">
             <span class="label"><Clock class="icon" />Timestamp</span>
@@ -31,22 +43,14 @@
             </span>
           </div>
           <div class="detail-row">
-            <span class="label"><User class="icon" />Miner</span>
-            <span class="value font-mono">{{ block.miner }}</span>
-          </div>
-          <div class="detail-row">
-            <span class="label"><Zap class="icon" />Block Size / Block Limit</span>
-            <span class="value">{{ block.size }} bytes / 1 000 000 bytes ({{ ((block.size / 1000000) * 100).toFixed(2) }}%)</span>
-          </div>
-          <div class="detail-row">
             <span class="label"><Gift class="icon" />Block Reward</span>
             <span class="value">
               <span class="reward-badge">{{ block.reward }} KNL</span>
             </span>
           </div>
           <div class="detail-row">
-            <span class="label"><FileBox class="icon" />Merkle Root</span>
-            <span class="value">{{ block.merkle_root }}</span>
+            <span class="label"><User class="icon" />Miner</span>
+            <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: block.miner })" class="value font-mono hash-link">{{ block.miner }}</a>
           </div>
         </div>
       </div>
@@ -58,16 +62,23 @@
             <span>Txn Hash</span>
             <span>From</span>
             <span>To</span>
-            <span class="text-right">Value</span>
+            <span class="text-right">Amount</span>
           </div>
           <div class="list-body">
             <div v-for="tx in block.transactions" :key="tx.hash" class="list-row">
               <div class="txn-hash-cell">
                 <CheckCircle2 size="18" class="status-icon-success" />
-                <span class="font-mono hash-link">{{ tx.hash.substring(0, 15) }}...</span>
+                <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{truncateHash(tx.hash)}}</a>
               </div>
-              <span class="font-mono">{{ tx.inputs[0].address.includes('Coinbase') ? 'Coinbase' : tx.inputs[0].address.substring(0, 15) + '...' }}</span>
-              <span class="font-mono">{{ tx.outputs[0].address.substring(0, 15) }}...</span>
+              
+              <span v-if="tx.inputs[0].address === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
+              <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.inputs[0].address })" class="font-mono hash-link">{{truncateHash(tx.inputs[0].address) }}</a>
+            
+              <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.outputs[0].address })" class="font-mono hash-link">
+                <ArrowRight size="14" />
+                {{truncateHash(tx.outputs[0].address)}}
+              </a>
+              
               <span class="text-right">{{ tx.outputs[0].amount }} KNL</span>
             </div>
           </div>
@@ -81,39 +92,47 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { apiState } from '../store.js';
-import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2 } from 'lucide-vue-next';
+import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2, ArrowRight } from 'lucide-vue-next';
 
 const props = defineProps({
   blockHash: { type: String, required: true }
 });
-
 defineEmits(['navigate']);
-
 const loading = ref(true);
 const block = ref(null);
 
 onMounted(async () => {
   if (!props.blockHash) return;
-  apiState.isConnecting = true;
   try {
     const response = await fetch(`${apiState.baseUrl}/api/block/${props.blockHash}`); 
     if (response.ok) {
       block.value = await response.json();
-      apiState.isConnected = true;
-    } else {
-      apiState.isConnected = false;
     }
   } catch (error) {
     console.error(`Impossible to fetch block details for ${props.blockHash}:`, error);
-    apiState.isConnected = false;
   } finally {
     loading.value = false;
-    apiState.isConnecting = false;
   }
 });
+const truncateHash = (hash) => {
+  if (!hash || hash.length <= 10) return hash;
+  return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
+};
 </script>
 
 <style scoped>
+.coinbase-text {
+    color: #fcd34d; 
+    font-weight: 600;
+}
+a.hash-link {
+  color: var(--color-blue);
+  cursor: pointer;
+  text-decoration: none;
+}
+a.hash-link:hover {
+    text-decoration: underline;
+}
 .container {
   padding: 2rem 2.5rem;
 }
@@ -123,7 +142,6 @@ onMounted(async () => {
   font-size: 1.25rem;
   color: var(--color-text-secondary);
 }
-
 .page-header {
   display: flex;
   align-items: center;
@@ -151,24 +169,20 @@ onMounted(async () => {
   font-weight: 800;
   color: var(--color-text-primary);
 }
-
 .card {
   margin-bottom: 2rem;
   overflow: hidden;
 }
-
 .card-title {
   font-size: 1.25rem;
   font-weight: 600;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 .info-grid {
   display: flex;
   flex-direction: column;
 }
-
 .detail-row {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -180,7 +194,6 @@ onMounted(async () => {
 .detail-row:last-child {
   border-bottom: none;
 }
-
 .label {
   color: var(--color-text-secondary);
   display: flex;
@@ -199,11 +212,6 @@ onMounted(async () => {
 .font-mono {
   font-family: monospace;
 }
-.hash-link {
-  color: var(--color-blue);
-  cursor: pointer;
-}
-
 .tx-badge {
   background-color: rgba(129, 140, 248, 0.2);
   color: #a5b4fc;
@@ -216,7 +224,6 @@ onMounted(async () => {
   padding: 0.35rem 0.75rem;
   border-radius: 6px;
 }
-
 .list-container {
   padding: 0 1.5rem 1.5rem;
 }
