@@ -39,7 +39,7 @@
           </div>
           <div class="cell-content">
             <Zap class="cell-icon text-yellow" />
-            <span>{{ block.size_used }}%</span>
+            <span>{{ block.size_used.toFixed(2) }}%</span>
           </div>
           <div class="text-right">
             <span class="reward-badge">

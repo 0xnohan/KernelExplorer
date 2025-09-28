@@ -61,7 +61,7 @@ const stats = computed(() => [
   { title: "Active Addresses", value: networkStats.value.active_addresses.toLocaleString(), change: "", changeType: "", color: "orange" }
 ]);
 
-const latestBlocks = computed(() => allBlocks.value.slice(0, 5));
+const latestBlocks = computed(() => allBlocks.value.slice(0, 4));
 const latestTransactions = computed(() => allTransactions.value.slice(0, 5));
 
 const getIconForStat = (title) => {
