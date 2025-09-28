@@ -65,7 +65,7 @@
             <span class="text-right">Amount</span>
           </div>
           <div class="list-body">
-            <div v-for="tx in block.transactions" :key="tx.hash" class="list-row">
+            <div v-for="tx in paginatedTransactions" :key="tx.hash" class="list-row">
               <div class="txn-hash-cell">
                 <CheckCircle2 size="18" class="status-icon-success" />
                 <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{truncateHash(tx.hash)}}</a>
@@ -83,6 +83,15 @@
             </div>
           </div>
         </div>
+        <div v-if="totalPages > 1" class="pagination-controls">
+          <button @click="prevPage" :disabled="currentPage === 1" class="page-button">
+            &lt; Previous
+          </button>
+          <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+          <button @click="nextPage" :disabled="currentPage === totalPages" class="page-button">
+            Next &gt;
+          </button>
+        </div>
       </div>
     </div>
     <div v-else class="loading-message">Block not found.</div>
@@ -90,7 +99,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { apiState } from '../store.js';
 import { ArrowLeft, Clock, ArrowLeftRight, User, Zap, Gift, FileBox, Hash, CheckCircle2, ArrowRight } from 'lucide-vue-next';
 
@@ -98,22 +107,59 @@ const props = defineProps({
   blockHash: { type: String, required: true }
 });
 defineEmits(['navigate']);
+
 const loading = ref(true);
 const block = ref(null);
+const currentPage = ref(1);
+const itemsPerPage = 10;
 
-onMounted(async () => {
-  if (!props.blockHash) return;
+const totalPages = computed(() => {
+  if (!block.value) return 0;
+  return Math.ceil(block.value.transactions.length / itemsPerPage);
+});
+
+const paginatedTransactions = computed(() => {
+  if (!block.value) return [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return block.value.transactions.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+
+const fetchBlockData = async (hash) => {
+  if (!hash) return;
+  loading.value = true;
+  block.value = null;
+  currentPage.value = 1;
   try {
-    const response = await fetch(`${apiState.baseUrl}/api/block/${props.blockHash}`); 
+    const response = await fetch(`${apiState.baseUrl}/api/block/${hash}`);
     if (response.ok) {
       block.value = await response.json();
     }
   } catch (error) {
-    console.error(`Impossible to fetch block details for ${props.blockHash}:`, error);
+    console.error(`Impossible to fetch block details for ${hash}:`, error);
   } finally {
     loading.value = false;
   }
+};
+
+onMounted(() => {
+  fetchBlockData(props.blockHash);
 });
+
+watch(() => props.blockHash, (newHash) => {
+  if (newHash) {
+    fetchBlockData(newHash);
+  }
+});
+
 const truncateHash = (hash) => {
   if (!hash || hash.length <= 10) return hash;
   return `${hash.substring(0, 5)}-${hash.substring(hash.length - 5)}`;
@@ -263,5 +309,37 @@ a.hash-link:hover {
 }
 .status-icon-success {
   color: #6ee7b7;
+}
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.page-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.page-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 </style>

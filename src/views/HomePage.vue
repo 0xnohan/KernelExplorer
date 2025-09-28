@@ -5,7 +5,7 @@
         <h1 class="hero-title">Kernel Explorer</h1>
         <p class="hero-subtitle">Explore blocks, transactions, and addresses on the Kernel blockchain</p>
         <div class="search-bar-wrapper">
-          <SearchBar />
+          <SearchBar @search="handleSearch" />
         </div>
       </div>
     </section>
@@ -52,7 +52,36 @@ const networkStats = ref({
   network_hashrate: "N/A"
 });
 
-defineEmits(['navigate']);
+const emit = defineEmits(['navigate']);
+
+const handleSearch = async (query) => {
+  try {
+    const response = await fetch(`${apiState.baseUrl}/api/search/${query}`);
+    if (response.ok) {
+      const result = await response.json();
+      if (result.found) {
+        switch (result.type) {
+          case 'block':
+            emit('navigate', 'BlockDetailsPage', { blockHash: result.identifier });
+            break;
+          case 'transaction':
+            emit('navigate', 'TransactionDetailsPage', { txHash: result.identifier });
+            break;
+          case 'address':
+            emit('navigate', 'AddressDetailsPage', { addressHash: result.identifier });
+            break;
+        }
+      } else {
+        alert("Aucun résultat trouvé pour votre recherche.");
+      }
+    } else {
+      alert("Erreur lors de la recherche.");
+    }
+  } catch (error) {
+    console.error("Erreur de recherche:", error);
+    alert("Une erreur est survenue lors de la recherche.");
+  }
+};
 
 const stats = computed(() => [
   { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "", changeType: "", color: "blue" }, //increase
@@ -93,7 +122,7 @@ onMounted(async () => {
     }
 
   } catch (error) {
-    console.error("Connexion error:", error);
+    console.error("Connection error:", error);
     apiState.isConnected = false;
   } finally {
     loading.value = false;

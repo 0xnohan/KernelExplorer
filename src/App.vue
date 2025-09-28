@@ -63,7 +63,7 @@ const handleNavigation = (pageName, props = {}) => {
   if (pages[pageName]) {
     currentPage.value = { name: pageName, props: props };
   } else {
-    console.warn(`Navigation a échoué: Page "${pageName}" non trouvée.`);
+    console.warn(`Error while navigating to "${pageName}": Page not found`);
   }
 };
 </script>
