@@ -1,18 +1,30 @@
 <template>
   <div class="search-container">
     <input
+      v-model="searchQuery"
+      @keyup.enter="performSearch"
       type="text"
       class="search-input"
       placeholder="Search by block number, transaction hash, or address..."
     >
-    <button type="submit" class="search-button">
+    <button @click="performSearch" type="submit" class="search-button">
       <Search class="icon" />
     </button>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { Search } from 'lucide-vue-next';
+
+const searchQuery = ref('');
+const emit = defineEmits(['search']);
+
+const performSearch = () => {
+  if (searchQuery.value.trim()) {
+    emit('search', searchQuery.value.trim());
+  }
+};
 </script>
 
 <style scoped>

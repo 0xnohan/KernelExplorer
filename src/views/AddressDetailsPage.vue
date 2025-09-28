@@ -39,40 +39,51 @@
 
       <div class="card tx-card">
         <h2 class="card-title">Transaction History ({{ addressDetails.transactions.length }})</h2>
-        <div v-if="addressDetails.transactions.length > 0" class="list-container">
-           <div class="list-header">
-              <span>Txn Hash</span>
-              <span>Block</span>
-              <span>From</span>
-              <span>To</span>
-              <span class="text-right">Amount</span>
-            </div>
-            <div class="list-body">
-              <div v-for="tx in addressDetails.transactions" :key="tx.hash" class="list-row">
-                <div class="txn-hash-cell">
-                  <CheckCircle2 size="18" class="status-icon-success" />
-                  <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{ truncateHash(tx.hash) }}</a>
-                </div>
-                
-                <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="font-mono hash-link">{{ tx.block_height }}</a>
-
-                <span v-if="tx.from[0] === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
-                <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ truncateHash(tx.from[0]) }}</a>
-
-                <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: findMainRecipient(tx.to, tx.from, true) })" class="font-mono hash-link address-to">
-                  <ArrowRight size="14" />
-                  {{ findMainRecipient(tx.to, tx.from) }}
-                </a>
-                
-                <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
-                  {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KNL
-                </span>
-              </div>
-            </div>
+        <div v-if="addressDetails.transactions.length > 0">
+          <div class="list-container">
+            <div class="list-header">
+               <span>Txn Hash</span>
+               <span>Block</span>
+               <span>From</span>
+               <span>To</span>
+               <span class="text-right">Amount</span>
+             </div>
+             <div class="list-body">
+               <div v-for="tx in paginatedTransactions" :key="tx.hash" class="list-row">
+                 <div class="txn-hash-cell">
+                   <CheckCircle2 size="18" class="status-icon-success" />
+                   <a href="#" @click.prevent="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })" class="font-mono hash-link">{{ truncateHash(tx.hash) }}</a>
+                 </div>
+                 
+                 <a href="#" @click.prevent="$emit('navigate', 'BlockDetailsPage', { blockHash: tx.block_hash })" class="font-mono hash-link">{{ tx.block_height }}</a>
+ 
+                 <span v-if="tx.from[0] === 'Coinbase'" class="font-mono coinbase-text">Coinbase</span>
+                 <a v-else href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: tx.from[0] })" class="font-mono hash-link">{{ truncateHash(tx.from[0]) }}</a>
+ 
+                 <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: findMainRecipient(tx.to, tx.from, true) })" class="font-mono hash-link address-to">
+                   <ArrowRight size="14" />
+                   {{ findMainRecipient(tx.to, tx.from) }}
+                 </a>
+                 
+                 <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
+                   {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KNL
+                 </span>
+               </div>
+             </div>
+           </div>
+          <div v-if="totalPages > 1" class="pagination-controls">
+            <button @click="prevPage" :disabled="currentPage === 1" class="page-button">
+              &lt; Previous
+            </button>
+            <span class="page-info">Page {{ currentPage }} of {{ totalPages }}</span>
+            <button @click="nextPage" :disabled="currentPage === totalPages" class="page-button">
+              Next &gt;
+            </button>
           </div>
-          <div v-else class="no-data-message">
-            No transactions found for this address
-          </div>
+        </div>
+        <div v-else class="no-data-message">
+          No transactions found for this address
+        </div>
       </div>
     </div>
      <div v-else class="loading-message">Address not found</div>
@@ -80,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { apiState } from '../store.js';
 import { ArrowLeft, MapPin, Wallet, ArrowLeftRight, DownloadCloud, UploadCloud, ArrowRight, CheckCircle2 } from 'lucide-vue-next';
 
@@ -92,6 +103,28 @@ defineEmits(['navigate']);
 
 const loading = ref(true);
 const addressDetails = ref(null);
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
+const totalPages = computed(() => {
+  if (!addressDetails.value) return 0;
+  return Math.ceil(addressDetails.value.transactions.length / itemsPerPage);
+});
+
+const paginatedTransactions = computed(() => {
+  if (!addressDetails.value) return [];
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return addressDetails.value.transactions.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
 
 const findMainRecipient = (outputs, inputs, fullAddress = false) => {
   const recipientOutput = outputs.find(out => !inputs.includes(out.address));
@@ -103,6 +136,7 @@ const fetchAddressData = async (hash) => {
     if (!hash) return;
     loading.value = true;
     addressDetails.value = null;
+    currentPage.value = 1;
     try {
         const response = await fetch(`${apiState.baseUrl}/api/address/${hash}`);
         if (response.ok) {
@@ -164,4 +198,37 @@ a.hash-link:hover { text-decoration: underline; }
 .txn-hash-cell { display: flex; align-items: center; gap: 0.75rem; }
 .status-icon-success { color: #6ee7b7; }
 .coinbase-text { color: #fcd34d; font-weight: 600; }
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-button {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.page-button:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.page-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-info {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
 </style>
