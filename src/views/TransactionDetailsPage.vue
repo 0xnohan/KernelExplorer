@@ -47,7 +47,7 @@
               <span class="value font-mono">{{ transaction.confirmations }}</span>
             </div>
             <div class="detail-row">
-              <span class="label"><Coins class="icon" />Total Amount</span>
+              <span class="label"><Coins class="icon" />Amount</span>
               <span class="value font-mono amount-value ">{{ transaction.value }} KOR</span>
             </div>
             <div class="detail-row">
