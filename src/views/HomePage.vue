@@ -1,16 +1,19 @@
 <template>
-  <div>
-    <section class="hero-section">
-      <div class="container">
-        <h1 class="hero-title">Kernel Explorer</h1>
-        <p class="hero-subtitle">Explore blocks, transactions, and addresses on the Kernel blockchain</p>
-        <div class="search-bar-wrapper">
-          <SearchBar @search="handleSearch" />
+  <div class="container">
+    <div class="page-header">
+      <div class="header-left">
+        <h1 class="page-title">Kernel Explorer</h1>
+        <div v-if="apiState.isConnected" class="live-dot-container">
+          <span class="live-dot"></span>
+          Live
         </div>
       </div>
-    </section>
+      <div class="header-right">
+        <SearchBar @search="handleSearch" />
+      </div>
+    </div>
 
-    <div class="main-content-area container">
+    <div class="main-content-area">
       <div v-if="loading" class="loading-message">Loading Blockchain Data...</div>
       <div v-else>
         <div class="stats-grid">
@@ -25,6 +28,7 @@
             :color="stat.color"
           />
         </div>
+        
         <div class="lists-grid">
           <LatestBlocks :blocks="latestBlocks" @navigate="(page, params) => $emit('navigate', page, params)" />
           <LatestTransactions :transactions="latestTransactions" @navigate="(page, params) => $emit('navigate', page, params)" />
@@ -72,19 +76,19 @@ const handleSearch = async (query) => {
             break;
         }
       } else {
-        alert("Aucun résultat trouvé pour votre recherche.");
+        alert("No results found for your search.");
       }
     } else {
-      alert("Erreur lors de la recherche.");
+      alert("Error during search.");
     }
   } catch (error) {
-    console.error("Erreur de recherche:", error);
-    alert("Une erreur est survenue lors de la recherche.");
+    console.error("Search error:", error);
+    alert("An error occurred during the search.");
   }
 };
 
 const stats = computed(() => [
-  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "", changeType: "", color: "blue" }, //increase
+  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "", changeType: "", color: "blue" },
   { title: "Total Transactions", value: networkStats.value.total_transactions.toLocaleString(), change: "", changeType: "", color: "purple" },
   { title: "Network Hashrate", value: networkStats.value.network_hashrate, change: "", changeType: "", color: "green" },
   { title: "Active Addresses", value: networkStats.value.active_addresses.toLocaleString(), change: "", changeType: "", color: "orange" }
@@ -132,28 +136,63 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.hero-section {
-  padding: 4rem 0;
-  background: transparent;
-  color: white;
-  text-align: center;
+.container {
+  padding: 2rem 2.5rem;
 }
-.hero-title {
-  font-size: 3rem;
-  font-weight: 800;
-}
-.hero-subtitle {
-  font-size: 1.125rem;
-  color: #e0e7ff;
-  margin-top: 0.5rem;
+.page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
   margin-bottom: 2rem;
 }
-.search-bar-wrapper {
-  max-width: 600px;
-  margin: 0 auto;
+@media (min-width: 768px) {
+  .page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+.header-right {
+  width: 100%;
+  max-width: 600px;
+}
+.live-dot-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6ee7b7;
+  padding: 0.35rem 0.75rem;
+  background-color: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: 9999px;
+}
+.live-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #6ee7b7;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(110, 231, 183, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0); }
+}
+
 .main-content-area {
-  padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -166,13 +205,23 @@ onMounted(async () => {
 }
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
+}
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 .lists-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   align-items: start;
+}
+@media (min-width: 1024px) {
+  .lists-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 </style>
