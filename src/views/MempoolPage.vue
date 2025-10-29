@@ -20,7 +20,7 @@
             :key="tx.hash"
             class="tx-square-settled"
             :style="getSettledSquareStyle(tx)"
-            :title="`Hash: ${tx.hash.substring(0, 20)}...\nValue: ${tx.value.toFixed(4)} KNL`"
+            :title="`Hash: ${tx.hash.substring(0, 20)}...\nValue: ${tx.value.toFixed(4)} KOR`"
           ></div>
         </transition-group>
       </div>
@@ -31,7 +31,7 @@
           :key="tx.hash"
           class="tx-square-sliding"
           :style="getSlidingSquareStyle(tx)"
-          :title="`Hash: ${tx.hash.substring(0, 20)}...\nValue: ${tx.value.toFixed(4)} KNL`"
+          :title="`Hash: ${tx.hash.substring(0, 20)}...\nValue: ${tx.value.toFixed(4)} KOR`"
         ></div>
       </div>
     </div>

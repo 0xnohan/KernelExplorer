@@ -43,7 +43,7 @@
           </div>
           <div class="text-right">
             <span class="reward-badge">
-              {{ block.reward }} KNL
+              {{ block.reward }} KOR
             </span>
           </div>
         </div>

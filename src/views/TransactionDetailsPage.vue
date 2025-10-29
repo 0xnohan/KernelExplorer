@@ -40,7 +40,7 @@
                     <User class="io-icon" />
                     <div class="address-details">
                         <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: input.address })" class="font-mono hash-link">{{ input.address === 'Coinbase' ? 'Coinbase' : input.address }}</a>
-                        <span v-if="input.value !== null" class="io-value">{{ input.value }} KNL</span>
+                        <span v-if="input.value !== null" class="io-value">{{ input.value }} KOR</span>
                     </div>
                 </div>
             </div>
@@ -55,7 +55,7 @@
                     <User class="io-icon" />
                     <div class="address-details">
                         <a href="#" @click.prevent="$emit('navigate', 'AddressDetailsPage', { addressHash: output.address })" class="font-mono hash-link">{{ output.address }}</a>
-                        <span class="io-value">{{ output.value }} KNL</span>
+                        <span class="io-value">{{ output.value }} KOR</span>
                     </div>
                 </div>
             </div>
@@ -66,7 +66,7 @@
             <div class="info-grid">
                  <div class="detail-row">
                     <span class="label"><Coins class="icon" />Transaction Fee</span>
-                    <span class="value font-mono fee-value">{{ transaction.fee }} KNL</span>
+                    <span class="value font-mono fee-value">{{ transaction.fee }} KOR</span>
                 </div>
                 <div class="detail-row">
                     <span class="label"><ShieldCheck class="icon" />Confirmations</span>

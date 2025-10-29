@@ -18,7 +18,7 @@
           </div>
           <div class="detail-row">
             <span class="label"><Wallet class="icon" />Balance</span>
-            <span class="value balance-amount">{{ addressDetails.current_balance }} KNL</span>
+            <span class="value balance-amount">{{ addressDetails.current_balance }} KOR</span>
           </div>
           <div class="detail-row">
             <span class="label"><ArrowLeftRight class="icon" />Transaction Count</span>
@@ -28,11 +28,11 @@
           </div>
           <div class="detail-row">
             <span class="label"><DownloadCloud class="icon" />Total Received</span>
-            <span class="value">{{ addressDetails.total_received }} KNL</span>
+            <span class="value">{{ addressDetails.total_received }} KOR</span>
           </div>
           <div class="detail-row">
             <span class="label"><UploadCloud class="icon" />Total Sent</span>
-            <span class="value">{{ addressDetails.total_sent }} KNL</span>
+            <span class="value">{{ addressDetails.total_sent }} KOR</span>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@
                  </a>
                  
                  <span class="text-right value-col" :class="tx.direction === 'IN' ? 'text-green' : 'text-red'">
-                   {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KNL
+                   {{ tx.direction === 'IN' ? '+' : '-' }} {{ tx.value }} KOR
                  </span>
                </div>
              </div>

@@ -21,7 +21,7 @@
           </div>
         </div>
         <div class="tx-value">
-          <span class="tx-amount-value">{{ tx.value }} KNL</span>
+          <span class="tx-amount-value">{{ tx.value }} KOR</span>
           <span class="tx-fee">Fee: {{ tx.fee }}</span>
         </div>
       </div>

@@ -45,7 +45,7 @@
           <div class="detail-row">
             <span class="label"><Gift class="icon" />Block Reward</span>
             <span class="value">
-              <span class="reward-badge">{{ block.reward }} KNL</span>
+              <span class="reward-badge">{{ block.reward }} KOR</span>
             </span>
           </div>
           <div class="detail-row">
@@ -79,7 +79,7 @@
                 {{truncateHash(tx.outputs[0].address)}}
               </a>
               
-              <span class="text-right">{{ tx.outputs[0].amount }} KNL</span>
+              <span class="text-right">{{ tx.outputs[0].amount }} KOR</span>
             </div>
           </div>
         </div>

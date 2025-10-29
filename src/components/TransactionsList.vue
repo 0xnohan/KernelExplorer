@@ -46,7 +46,7 @@
 
           <div class="text-right">
             <span class="value-badge">
-              {{ tx.value }} KNL
+              {{ tx.value }} KOR
             </span>
           </div>
         </div>
