@@ -2,7 +2,7 @@
   <div class="container">
     <div class="page-header">
       <div class="header-left">
-        <h1 class="page-title">Kernel Explorer</h1>
+        <h1 class="page-title">Kore Explorer</h1>
         <div v-if="apiState.isConnected" class="live-dot-container">
           <span class="live-dot"></span>
           Live

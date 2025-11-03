@@ -1,1 +1,1 @@
-# KernelExplorer
+# KoreExplorer
