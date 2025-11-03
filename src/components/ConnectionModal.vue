@@ -27,7 +27,7 @@ import { ref } from 'vue';
 
 const emit = defineEmits(['close', 'save']);
 
-const savedUrl = localStorage.getItem('kernelApiUrl') || 'http://127.0.0.1:5000';
+const savedUrl = localStorage.getItem('koreApiUrl') || 'http://127.0.0.1:5000';
 const urlParts = savedUrl.replace('http://', '').split(':');
 const ip = ref(urlParts[0] || '127.0.0.1');
 const port = ref(urlParts[1] || '5000');

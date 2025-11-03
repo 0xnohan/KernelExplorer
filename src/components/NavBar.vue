@@ -3,8 +3,8 @@
     <div>
       <div class="sidebar-header">
         <a href="#" @click.prevent="navigate('HomePage')" class="logo-link">
-          <img class="logo" src="/kernel-logo.png" alt="Kernel Logo" />
-          <span class="logo-text">Kernel</span>
+          <img class="logo" src="/kore-logo.png" alt="Kore Logo" />
+          <span class="logo-text">Kore</span>
         </a>
         <button @click="toggle" class="toggle-button">
           <ChevronsLeft class="icon" />

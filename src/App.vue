@@ -38,7 +38,7 @@ import MempoolPage from './views/MempoolPage.vue';
 const isModalOpen = ref(false);
 
 const saveConnection = (newUrl) => {
-  localStorage.setItem('kernelApiUrl', newUrl);
+  localStorage.setItem('koreApiUrl', newUrl);
   apiState.baseUrl = newUrl;
   isModalOpen.value = false;
   window.location.reload(); 
