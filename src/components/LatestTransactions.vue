@@ -10,7 +10,12 @@
     </div>
 
     <div class="transactions-list">
-      <div v-for="tx in transactions" :key="tx.hash" class="transaction-item">
+      <div 
+        v-for="tx in transactions" 
+        :key="tx.hash" 
+        class="transaction-item"
+        @click="$emit('navigate', 'TransactionDetailsPage', { txHash: tx.hash })"
+      >
         <div class="icon-wrapper">
           <CheckCircle2 :size="20" class="status-icon-success" />
         </div>
@@ -84,6 +89,7 @@ const truncateHash = (hash) => {
   border-radius: 0.75rem;
   background-color: rgba(255, 255, 255, 0.05);
   transition: background-color 0.2s;
+  cursor: pointer;
 }
 .transaction-item:hover {
   background-color: rgba(255, 255, 255, 0.1);

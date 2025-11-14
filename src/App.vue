@@ -1,10 +1,9 @@
 <template>
-  <div class="dashboard-layout" :class="{ 'sidebar-closed': !isSidebarOpen }">
+  <div class="dashboard-layout"> 
     <NavBar 
-      :is-open="isSidebarOpen" 
       @navigate="handleNavigation"
-      @toggle-sidebar="toggleSidebar"
       @open-connect-modal="isModalOpen = true" 
+      @search="handleSearch"
     />
     <main class="main-content">
       <component 
@@ -44,9 +43,6 @@ const saveConnection = (newUrl) => {
   window.location.reload(); 
 };
 
-const isSidebarOpen = ref(true);
-const toggleSidebar = () => { isSidebarOpen.value = !isSidebarOpen.value; };
-
 const pages = { 
   HomePage, 
   BlocksPage,
@@ -66,26 +62,47 @@ const handleNavigation = (pageName, props = {}) => {
     console.warn(`Error while navigating to "${pageName}": Page not found`);
   }
 };
+
+const handleSearch = async (query) => {
+  try {
+    const response = await fetch(`${apiState.baseUrl}/api/search/${query}`);
+    if (response.ok) {
+      const result = await response.json();
+      if (result.found) {
+        switch (result.type) {
+          case 'block':
+            handleNavigation('BlockDetailsPage', { blockHash: result.identifier });
+            break;
+          case 'transaction':
+            handleNavigation('TransactionDetailsPage', { txHash: result.identifier });
+            break;
+          case 'address':
+            handleNavigation('AddressDetailsPage', { addressHash: result.identifier });
+            break;
+        }
+      } else {
+        alert("No results found for your search.");
+      }
+    } else {
+      alert("Error during search.");
+    }
+  } catch (error) {
+    console.error("Search error:", error);
+    alert("An error occurred during the search.");
+  }
+};
 </script>
 
 <style>
 .dashboard-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  transition: grid-template-columns 0.3s ease-in-out;
-  height: 100vh; 
+  display: flex;
+  flex-direction: column;
+  transition: none;
   width: 100vw;  
-  overflow: hidden;
-}
-
-.dashboard-layout.sidebar-closed {
-  grid-template-columns: 85px 1fr;
+  min-height: 100vh; 
 }
 
 .main-content {
   flex-grow: 1;
-  overflow-y: auto;
-  height: 100vh;
 }
-
 </style>

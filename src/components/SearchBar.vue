@@ -5,7 +5,7 @@
       @keyup.enter="performSearch"
       type="text"
       class="search-input"
-      placeholder="Search by block number, transaction hash, or address..."
+      placeholder="Search by block, transaction, address..."
     >
     <button @click="performSearch" type="submit" class="search-button">
       <Search class="icon" />
@@ -35,16 +35,16 @@ const performSearch = () => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
   padding: 0.25rem;
-  padding-left: 1rem;
+  padding-left: 0.75rem; 
 }
 
 .search-input {
   flex-grow: 1;
   background: none;
   border: none;
-  padding: 0.75rem 0.5rem;
+  padding: 0.5rem 0.5rem; 
   color: white;
-  font-size: 1rem;
+  font-size: 0.875rem; 
   outline: none;
 }
 
@@ -58,7 +58,7 @@ const performSearch = () => {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 0.6rem;
+  padding: 0.5rem;
   cursor: pointer;
   display: flex;
   transition: background-color 0.2s ease;
@@ -69,7 +69,7 @@ const performSearch = () => {
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 18px; 
+  height: 18px; 
 }
 </style>

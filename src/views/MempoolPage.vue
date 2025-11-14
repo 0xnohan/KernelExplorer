@@ -127,7 +127,7 @@ onUnmounted(() => {
 
 const truncateHash = (hash, len = 10) => {
   if (!hash || hash.length <= (len * 2)) return hash;
-  return `${hash.substring(0, len)}...${hash.substring(hash.length - len)}`;
+  return `${hash.substring(0, len)}-${hash.substring(hash.length - len)}`;
 };
 
 const copyToClipboard = async (text) => {

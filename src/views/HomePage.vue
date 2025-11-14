@@ -1,18 +1,5 @@
 <template>
   <div class="container">
-    <div class="page-header">
-      <div class="header-left">
-        <h1 class="page-title">Kore Explorer</h1>
-        <div v-if="apiState.isConnected" class="live-dot-container">
-          <span class="live-dot"></span>
-          Live
-        </div>
-      </div>
-      <div class="header-right">
-        <SearchBar @search="handleSearch" />
-      </div>
-    </div>
-
     <div class="main-content-area">
       <div v-if="loading" class="loading-message">Loading Blockchain Data...</div>
       <div v-else>
@@ -22,11 +9,7 @@
             :key="stat.title"
             :title="stat.title"
             :value="stat.value"
-            :change="stat.change"
-            :changeType="stat.changeType"
-            :icon="getIconForStat(stat.title)"
-            :color="stat.color"
-          />
+            />
         </div>
         
         <div class="lists-grid">
@@ -44,8 +27,6 @@ import { apiState } from '../store.js';
 import StatCard from '../components/StatCard.vue';
 import LatestBlocks from '../components/LatestBlocks.vue';
 import LatestTransactions from '../components/LatestTransactions.vue';
-import SearchBar from '../components/SearchBar.vue';
-import { Monitor, Zap, ArrowLeftRight, Users } from 'lucide-vue-next';
 
 const loading = ref(true);
 const allBlocks = ref([]);
@@ -53,57 +34,25 @@ const allTransactions = ref([]);
 const networkStats = ref({
   total_transactions: 0,
   active_addresses: 0,
-  network_hashrate: "N/A"
+  network_hashrate: "0 H/s"
 });
 
 const emit = defineEmits(['navigate']);
 
-const handleSearch = async (query) => {
-  try {
-    const response = await fetch(`${apiState.baseUrl}/api/search/${query}`);
-    if (response.ok) {
-      const result = await response.json();
-      if (result.found) {
-        switch (result.type) {
-          case 'block':
-            emit('navigate', 'BlockDetailsPage', { blockHash: result.identifier });
-            break;
-          case 'transaction':
-            emit('navigate', 'TransactionDetailsPage', { txHash: result.identifier });
-            break;
-          case 'address':
-            emit('navigate', 'AddressDetailsPage', { addressHash: result.identifier });
-            break;
-        }
-      } else {
-        alert("No results found for your search.");
-      }
-    } else {
-      alert("Error during search.");
-    }
-  } catch (error) {
-    console.error("Search error:", error);
-    alert("An error occurred during the search.");
-  }
-};
+const stats = computed(() => {
+  const currentBlockHeight = allBlocks.value.length > 0 ? allBlocks.value[0].height : 0;
 
-const stats = computed(() => [
-  { title: "Current Block", value: allBlocks.value.length > 0 ? allBlocks.value[0].height.toLocaleString() : '0', change: "", changeType: "", color: "blue" },
-  { title: "Total Transactions", value: networkStats.value.total_transactions.toLocaleString(), change: "", changeType: "", color: "purple" },
-  { title: "Network Hashrate", value: networkStats.value.network_hashrate, change: "", changeType: "", color: "green" },
-  { title: "Active Addresses", value: networkStats.value.active_addresses.toLocaleString(), change: "", changeType: "", color: "orange" }
-]);
+  return [
+    { title: "Block Height", value: currentBlockHeight.toLocaleString() },
+    { title: "Current Supply (KOR)", value: (currentBlockHeight * 50).toLocaleString() },
+    { title: "Active Addresses", value: networkStats.value.active_addresses.toLocaleString() },
+    { title: "Volume (Txs/24h)", value: networkStats.value.total_transactions.toLocaleString() - currentBlockHeight - 1 },
+    { title: "Network (Hashrate)", value: networkStats.value.network_hashrate },
+  ];
+});
 
 const latestBlocks = computed(() => allBlocks.value.slice(0, 4));
 const latestTransactions = computed(() => allTransactions.value.slice(0, 5));
-
-const getIconForStat = (title) => {
-  const map = {
-    "Current Block": Monitor, "Total Transactions": ArrowLeftRight,
-    "Network Hashrate": Zap, "Active Addresses": Users
-  };
-  return map[title] || Monitor;
-};
 
 onMounted(async () => {
   loading.value = true;
@@ -139,58 +88,6 @@ onMounted(async () => {
 .container {
   padding: 2rem 2.5rem;
 }
-.page-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-@media (min-width: 768px) {
-  .page-header {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--color-text-primary);
-}
-.header-right {
-  width: 100%;
-  max-width: 600px;
-}
-.live-dot-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6ee7b7;
-  padding: 0.35rem 0.75rem;
-  background-color: rgba(52, 211, 153, 0.1);
-  border: 1px solid rgba(52, 211, 153, 0.2);
-  border-radius: 9999px;
-}
-.live-dot {
-  width: 10px;
-  height: 10px;
-  background-color: #6ee7b7;
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
-}
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(110, 231, 183, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(110, 231, 183, 0); }
-}
 
 .main-content-area {
   display: flex;
@@ -205,12 +102,12 @@ onMounted(async () => {
 }
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
   gap: 1.5rem;
 }
-@media (min-width: 1024px) {
+@media (min-width: 1280px) { 
   .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 .lists-grid {
